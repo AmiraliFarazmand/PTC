@@ -10,8 +10,9 @@ import (
 func main() {
 	db.ConnectDB("mongodb://localhost:27017", "ParsTasmimDB")
 	userCollection := db.GetCollection("Users")
-	// db.InsertIntoCollection(userCollection, bson.M{"username": "sdfsf", "password": "sdfsdf"})
+	db.InsertIntoCollection(userCollection, bson.M{"username": "sdfsf", "password": "sdfsdf"})
 	found := db.FindInstance(userCollection, bson.M{"username":"sdfsf"})
 	fmt.Println(found)
+	
 	
 }

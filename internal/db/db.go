@@ -10,13 +10,20 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
+// TODO: Check if can be packagelevel variable or not
 var DB *mongo.Database
+var UserCollection *mongo.Collection
+var ItemCollection *mongo.Collection
+var PurchaseCollection *mongo.Collection
 
 func ConnectDB(uri, dbName string) {
 	_, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	client, _ := mongo.Connect(options.Client().ApplyURI(uri))
 	DB = client.Database(dbName)
+	UserCollection = DB.Collection("Users")
+	ItemCollection = DB.Collection("Items")
+	PurchaseCollection = DB.Collection("Purchases")
 }
 
 func GetCollection(collectionName string) *mongo.Collection {
