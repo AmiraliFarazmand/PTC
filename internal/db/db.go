@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -31,9 +30,7 @@ func GetCollection(collectionName string) *mongo.Collection {
 }
 
 func InsertIntoCollection(collection *mongo.Collection, instance bson.M) {
-	res, _ := collection.InsertOne(context.Background(), instance)
-	id := res.InsertedID
-	fmt.Println(id)
+	collection.InsertOne(context.Background(), instance)
 }
 
 func FindInstance(collection *mongo.Collection, instance bson.M) *mongo.SingleResult {

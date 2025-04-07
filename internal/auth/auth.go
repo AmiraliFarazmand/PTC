@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -67,7 +66,6 @@ func Signup(c *gin.Context) {
 		Username: body.Username,
 		Password: string(hash),
 	}
-	// db.InsertIntoCollection(db.UserCollection, user)
 	_, err = db.UserCollection.InsertOne(c, user)
 	if err != nil {
 		utils.RespondWithError(c, http.StatusInternalServerError, "Failed to create user")
@@ -77,6 +75,7 @@ func Signup(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "user created"})
 }
 
+
 func Login(c *gin.Context) {
 	var body authRequest
 	// Validate format of request
@@ -85,32 +84,22 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// var user User
-
-	// err := db.UserCollection.FindOne(c.Request.Context(), bson.M{"username": body.Username}).Decode(&user)
-	// if err != nil {
-	// 	fmt.Println("case2", err)
-	// 	fmt.Println(user.Username, user.Password)
-	// 	utils.RespondWithError(c, http.StatusBadRequest, "Invalid username or password")
-	// 	return
-	// }
 	var raw bson.M
+	// Check if the user found
 	err := db.UserCollection.FindOne(c.Request.Context(), bson.M{"username": body.Username}).Decode(&raw)
 	if err != nil {
-		fmt.Println("case2", err)
-		utils.RespondWithError(c, http.StatusBadRequest, "Invalid username or password")
+		utils.RespondWithError(c, http.StatusNotFound, "Invalid username or password")
 		return
 	}
+	// Check if the password is correct
 	claimedPassword := raw["password"].(string)
 	err = bcrypt.CompareHashAndPassword([]byte(claimedPassword), []byte(body.Password))
 	if err != nil {
-		fmt.Println("case3", err.Error(), "####\n", claimedPassword, "****\n", body.Password)
 		utils.RespondWithError(c, http.StatusBadRequest, "Invalid username or password")
 		return
 	}
-	userID := raw["_id"].(bson.ObjectID).Hex()
 
-	fmt.Println("userID", userID)
+	userID := raw["_id"].(bson.ObjectID).Hex()
 	tokenString, err := createToken(userID)
 	if err != nil {
 		utils.RespondWithError(c, http.StatusInternalServerError, "Failed to create token")
@@ -125,6 +114,7 @@ func Login(c *gin.Context) {
 	})
 }
 
+// Some handler to check if the user is authenticated
 func ValidateIsAuthenticated(c *gin.Context) {
 	user, exists := c.Get("user")
 	if !exists {
