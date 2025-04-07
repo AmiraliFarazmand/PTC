@@ -10,29 +10,31 @@ import (
 	"github.com/AmiraliFarazmand/PTC_Task/internal/db"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-func validateClaims(claims jwt.MapClaims) (auth.User, bool) {
+func validateClaims(c *gin.Context, claims jwt.MapClaims) (auth.User, bool) {
 	// check if the token is expired
 	if float64(time.Now().Unix()) > claims["exp"].(float64) {
+		log.Println("case1: ", claims)
 		return auth.User{}, false
 	}
 
-	   // Parse the user ID from the claims
-	   userID, err := primitive.ObjectIDFromHex(claims["sub"].(string))
-	   if err != nil {
-		   return auth.User{}, false
-	   }
-   
-	   // Find the user in the database
-	   var user auth.User
-	   err = db.UserCollection.FindOne(nil, bson.M{"_id": userID}).Decode(&user)
-	   if err != nil {
-		   return auth.User{}, false
-	   }
- 	return auth.User{}, false   
+	// Parse the user ID from the claims
+	userID, err := bson.ObjectIDFromHex(claims["sub"].(string))
+	if err != nil {
+		log.Println("case2: ", claims)
+		return auth.User{}, false
+	}
+
+	// Find the user in the database
+	var user auth.User
+	err = db.UserCollection.FindOne(c.Request.Context(), bson.M{"_id": userID}).Decode(&user)
+	if err != nil {
+		log.Println("case3: ", claims, err, user)
+		return auth.User{}, false
+	}
+	return user, true
 }
 
 func RequireAuth(c *gin.Context) {
@@ -62,7 +64,7 @@ func RequireAuth(c *gin.Context) {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
-	user, ok := validateClaims(claims)
+	user, ok := validateClaims(c, claims)
 	if !ok {
 		c.AbortWithStatus(http.StatusUnauthorized)
 	}
