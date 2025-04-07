@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/AmiraliFarazmand/PTC_Task/internal/auth"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/middleware"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/purchase"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,6 +26,7 @@ func SetupRouter() *gin.Engine {
 	r.POST("/signup", auth.Signup)
 	r.POST("/login", auth.Login)
 	r.GET("/validate", middleware.RequireAuth, auth.ValidateIsAuthenticated)
+	r.POST("/purchase", middleware.RequireAuth, purchase.CreatePurchase)
 
 	return r
 }
