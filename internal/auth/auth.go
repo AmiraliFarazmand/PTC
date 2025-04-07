@@ -1,8 +1,8 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/db"
@@ -10,7 +10,6 @@ import (
 	"github.com/AmiraliFarazmand/PTC_Task/internal/validators"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"go.mongodb.org/mongo-driver/bson/primitive" //TODO: primitive for previous version
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -18,16 +17,16 @@ import (
 const tokenExpireTime int = 72 // expire time in hour
 
 type User struct {
-	ID       primitive.ObjectID `bson:"_id,omitempty"` // MongoDB ObjectID
-	Username string             `bson:"username"`
-	Password string             `bson:"password"`
+	ID       bson.ObjectID `bson:"_id,omitempty"` // MongoDB ObjectID
+	Username string        `bson:"username"`
+	Password string        `bson:"password"`
 }
 type authRequest struct {
 	Username string
 	Password string
 }
 
-func createToken(userID uint) (string, error) {
+func createToken(userID string) (string, error) {
 
 	// Create Token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -35,7 +34,7 @@ func createToken(userID uint) (string, error) {
 		"exp": time.Now().Add(time.Hour * time.Duration(tokenExpireTime)).Unix(),
 	})
 	// TODO: should be stored in an environment variable or a config file
-	secretKey := "SomeRandomSecretKey"
+	secretKey := "SomeRandomSecretKeyjsdfijsdfiojsjiofjsofhsidhfuiwhehwuifhwwiufhxciuv"
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		return "", err
@@ -64,8 +63,6 @@ func Signup(c *gin.Context) {
 		return
 	}
 
-	// Insert into DB
-	// user := bson.M{"username": body.Username, "password": string(hash)}
 	user := User{
 		Username: body.Username,
 		Password: string(hash),
@@ -88,24 +85,33 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	var user User
-	if validators.CheckUniquenessUsername(body.Username) != nil {
-		utils.RespondWithError(c, http.StatusBadRequest, "Invalid username or password")
-		return
-	}
-	err := db.UserCollection.FindOne(c, bson.M{"username": body.Username}).Decode(&user)
-	if err != nil {
-		utils.RespondWithError(c, http.StatusBadRequest, "Invalid username or password")
-		return
-	}
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
-	if err != nil {
-		utils.RespondWithError(c, http.StatusBadRequest, "Invalid username or password")
-		return
-	}
+	// var user User
 
-	idUint,_ := strconv.ParseUint(user.ID.Hex(), 16, 0)
-	tokenString, err := createToken(uint(idUint))
+	// err := db.UserCollection.FindOne(c.Request.Context(), bson.M{"username": body.Username}).Decode(&user)
+	// if err != nil {
+	// 	fmt.Println("case2", err)
+	// 	fmt.Println(user.Username, user.Password)
+	// 	utils.RespondWithError(c, http.StatusBadRequest, "Invalid username or password")
+	// 	return
+	// }
+	var raw bson.M
+	err := db.UserCollection.FindOne(c.Request.Context(), bson.M{"username": body.Username}).Decode(&raw)
+	if err != nil {
+		fmt.Println("case2", err)
+		utils.RespondWithError(c, http.StatusBadRequest, "Invalid username or password")
+		return
+	}
+	claimedPassword := raw["password"].(string)
+	err = bcrypt.CompareHashAndPassword([]byte(claimedPassword), []byte(body.Password))
+	if err != nil {
+		fmt.Println("case3", err.Error(), "####\n", claimedPassword, "****\n", body.Password)
+		utils.RespondWithError(c, http.StatusBadRequest, "Invalid username or password")
+		return
+	}
+	userID := raw["_id"].(bson.ObjectID).Hex()
+
+	fmt.Println("userID", userID)
+	tokenString, err := createToken(userID)
 	if err != nil {
 		utils.RespondWithError(c, http.StatusInternalServerError, "Failed to create token")
 		return
