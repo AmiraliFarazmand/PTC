@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/db"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/utils"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -13,7 +14,7 @@ func confirmPayment(purchaseID bson.ObjectID) error {
 	result, err := db.PurchaseCollection.UpdateOne(
 		context.Background(),
 		bson.M{"_id": purchaseID},
-		bson.M{"$set": bson.M{"status": "paid"}})
+		bson.M{"$set": bson.M{"status": "packaging and delivering", "payment_id": utils.RandSeq(10)}})
 	if err != nil {
 		return err
 	}
