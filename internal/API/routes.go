@@ -27,6 +27,7 @@ func SetupRouter() *gin.Engine {
 	r.POST("/login", auth.Login)
 	r.GET("/validate", middleware.RequireAuth, auth.ValidateIsAuthenticated)
 	r.POST("/purchase", middleware.RequireAuth, purchase.CreatePurchase)
+	r.PUT("/pay", purchase.PayPurchase)
 
 	return r
 }

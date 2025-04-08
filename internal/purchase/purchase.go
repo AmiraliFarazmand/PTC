@@ -57,4 +57,7 @@ func CreatePurchase(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Purchase created successfully"})
     fmt.Printf("%+v\n", purchase)
 
+	// call a function to process the purchase in a limited time otherwise drop it
+
 }
+
