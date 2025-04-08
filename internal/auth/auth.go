@@ -75,7 +75,6 @@ func Signup(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "user created"})
 }
 
-
 func Login(c *gin.Context) {
 	var body authRequest
 	// Validate format of request
