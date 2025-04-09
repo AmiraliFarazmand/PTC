@@ -17,7 +17,14 @@ func (s *UserService) Signup(username, password string) error {
     if err == nil {
         return errors.New("username already exists")
     }
-
+    
+    if err = validateUsername(username); err != nil {
+        return err
+    }
+    if err = validatePassword(password); err != nil {   
+        return err
+    }
+    
     // Hash the password
     hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
     if err != nil {
@@ -46,4 +53,22 @@ func (s *UserService) Login(username, password string) (domain.User, error) {
     }
 
     return user, nil
+}
+
+
+func validateUsername(username string) error {
+	if len(username) < 3 || len(username) > 64 {
+		return errors.New("username must be between 3 and 64 characters")
+	}
+	return nil
+}
+
+func validatePassword(password string) error {
+	if len(password) < 8 {
+		return errors.New("password must be at least 8 characters long")
+	}
+	if len(password) > 64 {
+		return errors.New("password must be less than 64 characters long")
+	}
+	return nil
 }
