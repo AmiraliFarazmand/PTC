@@ -33,6 +33,7 @@ func main() {
 	r := gin.Default()
 	r.POST("/signup", authHandler.Signup)
 	r.POST("/login", authHandler.Login)
+	// r.GET("/validator", authHandler.Validate)
 
 	// Start the server
 	r.Run(":8080")
