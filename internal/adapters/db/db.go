@@ -22,7 +22,11 @@ func (r *MongoUserRepository) FindByUsername(username string) (domain.User, erro
     err := r.Collection.FindOne(context.TODO(), bson.M{"username": username}).Decode(&user)
     return user, err
 }
-
+func (r *MongoUserRepository) FindByID(id string) (domain.User, error) {
+    var user domain.User
+    err := r.Collection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&user)
+    return user, err
+}
 
 func (r *MongoUserRepository) IsUsernameUnique(username string) (bool, error) {
     filter := bson.M{"username": username}

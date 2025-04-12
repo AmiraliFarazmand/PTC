@@ -1,10 +1,11 @@
 package app
 
 import (
-    "errors"
+	"errors"
 
-    "github.com/AmiraliFarazmand/PTC_Task/internal/domain"
-    "golang.org/x/crypto/bcrypt"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/domain"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
@@ -71,4 +72,15 @@ func validatePassword(password string) error {
 		return errors.New("password must be less than 64 characters long")
 	}
 	return nil
+}
+
+func (s *UserService) FindUserByID(userID string) (domain.User, error) {
+    // Convert the userID string to a MongoDB ObjectID
+    objectID, err := bson.ObjectIDFromHex(userID)
+    if err != nil {
+        return domain.User{}, err
+    }
+
+    // Use the repository to find the user
+    return s.UserRepo.FindByID(objectID.String())
 }
