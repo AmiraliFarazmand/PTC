@@ -9,53 +9,52 @@ import (
 )
 
 type UserService struct {
-    UserRepo domain.UserRepository
+	UserRepo domain.UserRepository
 }
 
 func (s *UserService) Signup(username, password string) error {
-    // Check if the username already exists
-    _, err := s.UserRepo.FindByUsername(username)
-    if err == nil {
-        return errors.New("username already exists")
-    }
-    
-    if err = validateUsername(username); err != nil {
-        return err
-    }
-    if err = validatePassword(password); err != nil {   
-        return err
-    }
-    
-    // Hash the password
-    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-    if err != nil {
-        return err
-    }
+	// Check if the username already exists
+	_, err := s.UserRepo.FindByUsername(username)
+	if err == nil {
+		return errors.New("username already exists")
+	}
 
-    // Create the user
-    user := domain.User{
-        Username: username,
-        Password: string(hashedPassword),
-    }
-    return s.UserRepo.Create(user)
+	if err = validateUsername(username); err != nil {
+		return err
+	}
+	if err = validatePassword(password); err != nil {
+		return err
+	}
+
+	// Hash the password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	// Create the user
+	user := domain.User{
+		Username: username,
+		Password: string(hashedPassword),
+	}
+	return s.UserRepo.Create(user)
 }
 
 func (s *UserService) Login(username, password string) (domain.User, error) {
-    // Find the user by username
-    user, err := s.UserRepo.FindByUsername(username)
-    if err != nil {
-        return domain.User{}, errors.New("invalid username or password")
-    }
+	// Find the user by username
+	user, err := s.UserRepo.FindByUsername(username)
+	if err != nil {
+		return domain.User{}, errors.New("invalid username or password")
+	}
 
-    // Compare the password
-    err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-    if err != nil {
-        return domain.User{}, errors.New("invalid username or password")
-    }
+	// Compare the password
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return domain.User{}, errors.New("invalid username or password")
+	}
 
-    return user, nil
+	return user, nil
 }
-
 
 func validateUsername(username string) error {
 	if len(username) < 3 || len(username) > 64 {
@@ -75,12 +74,12 @@ func validatePassword(password string) error {
 }
 
 func (s *UserService) FindUserByID(userID string) (domain.User, error) {
-    // Convert the userID string to a MongoDB ObjectID
-    objectID, err := bson.ObjectIDFromHex(userID)
-    if err != nil {
-        return domain.User{}, err
-    }
+	// Convert the userID string to a MongoDB ObjectID
+	objectID, err := bson.ObjectIDFromHex(userID)
+	if err != nil {
+		return domain.User{}, err
+	}
 
-    // Use the repository to find the user
-    return s.UserRepo.FindByID(objectID.String())
+	// Use the repository to find the user
+	return s.UserRepo.FindByID(objectID.Hex())
 }
