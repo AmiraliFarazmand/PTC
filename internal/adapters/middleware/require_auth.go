@@ -10,7 +10,7 @@ import (
 )
 
 type AuthMiddleware struct {
-	UserService *app.UserService
+	UserService *app.UserServiceImpl
 	SecretKey   string
 }
 

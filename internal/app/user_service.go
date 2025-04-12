@@ -8,11 +8,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserService struct {
+type UserServiceImpl struct {
 	UserRepo domain.UserRepository
 }
 
-func (s *UserService) Signup(username, password string) error {
+func (s *UserServiceImpl) Signup(username, password string) error {
 	// Check if the username already exists
 	_, err := s.UserRepo.FindByUsername(username)
 	if err == nil {
@@ -40,7 +40,7 @@ func (s *UserService) Signup(username, password string) error {
 	return s.UserRepo.Create(user)
 }
 
-func (s *UserService) Login(username, password string) (domain.User, error) {
+func (s *UserServiceImpl) Login(username, password string) (domain.User, error) {
 	// Find the user by username
 	user, err := s.UserRepo.FindByUsername(username)
 	if err != nil {
@@ -73,7 +73,7 @@ func validatePassword(password string) error {
 	return nil
 }
 
-func (s *UserService) FindUserByID(userID string) (domain.User, error) {
+func (s *UserServiceImpl) FindUserByID(userID string) (domain.User, error) {
 	// Convert the userID string to a MongoDB ObjectID
 	objectID, err := bson.ObjectIDFromHex(userID)
 	if err != nil {

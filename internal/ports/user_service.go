@@ -1,0 +1,8 @@
+package ports
+
+import "github.com/AmiraliFarazmand/PTC_Task/internal/domain"
+
+type UserService interface {
+    Signup(username, password string) error
+    Login(username, password string) (domain.User, error)
+}

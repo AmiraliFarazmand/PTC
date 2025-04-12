@@ -11,6 +11,6 @@ type User struct {
 type UserRepository interface {
     Create(user User) error
     FindByUsername(username string) (User, error)
-    // IsUsernameUnique(username string) (bool, error)
+    IsUsernameUnique(username string) (bool, error)
     FindByID(id string) (User, error)   
 }

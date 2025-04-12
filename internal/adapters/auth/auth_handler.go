@@ -15,7 +15,7 @@ import (
 const tokenExpireTime int = 72
 
 type AuthHandler struct {
-	UserService *app.UserService
+	UserService *app.UserServiceImpl
 }
 
 func (h *AuthHandler) Signup(c *gin.Context) {
@@ -109,7 +109,7 @@ func (h *AuthHandler) ValidateHnadler(c *gin.Context) {
 	})
 }
 
-func validateClaims(claims jwt.MapClaims, userService *app.UserService) (domain.User, bool) {
+func validateClaims(claims jwt.MapClaims, userService *app.UserServiceImpl) (domain.User, bool) {
 	// Check if the token is expired
 	if float64(time.Now().Unix()) > claims["exp"].(float64) {
 		return domain.User{}, false

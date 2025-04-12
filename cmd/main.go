@@ -24,7 +24,7 @@ func main() {
 	userRepo := &db.MongoUserRepository{Collection: userCollection}
 
 	// Initialize services
-	userService := &app.UserService{UserRepo: userRepo}
+	userService := &app.UserServiceImpl{UserRepo: userRepo}
 
 	// Initialize handlers
 	authHandler := &auth.AuthHandler{UserService: userService}
