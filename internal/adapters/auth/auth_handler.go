@@ -55,7 +55,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	userID := user.ID.Hex()
+	userID := user.ID
 	tokenString, err := createToken(userID)
 	if err != nil {
 		utils.RespondWithError(c, http.StatusInternalServerError, "Failed to create token")
@@ -67,7 +67,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"token": tokenString,
 	})
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "user_id": user.ID.Hex()})
+	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "user_id": user.ID})
 }
 
 func createToken(userID string) (string, error) {
@@ -104,7 +104,7 @@ func (h *AuthHandler) ValidateHnadler(c *gin.Context) {
 	// Respond with the user information
 	c.JSON(http.StatusOK, gin.H{
 		"message":  "User is authenticated",
-		"user_id":  userObj.ID.Hex(),
+		"user_id":  userObj.ID,
 		"username": userObj.Username,
 	})
 }

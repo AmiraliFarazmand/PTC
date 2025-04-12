@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/domain"
-	"go.mongodb.org/mongo-driver/v2/bson"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -74,12 +73,10 @@ func validatePassword(password string) error {
 }
 
 func (s *UserServiceImpl) FindUserByID(userID string) (domain.User, error) {
-	// Convert the userID string to a MongoDB ObjectID
-	objectID, err := bson.ObjectIDFromHex(userID)
-	if err != nil {
-		return domain.User{}, err
-	}
-
 	// Use the repository to find the user
-	return s.UserRepo.FindByID(objectID.Hex())
+	user, err := s.UserRepo.FindByID(userID)
+	if err != nil {
+		return domain.User{}, errors.New("user not found")
+	}
+	return user, nil
 }
