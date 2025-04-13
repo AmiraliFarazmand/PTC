@@ -24,7 +24,7 @@ func (s *GinServer) Start() {
 	// Purchase routes
 	r.POST("/purchase", s.processPurchase)
 
-	r.POST("/purchase/pay",s.confirmPayment)
+	r.POST("/purchase/pay", s.confirmPayment)
 
 	// User routes
 	authHandler := auth.AuthHandler{UserService: &s.UserService}

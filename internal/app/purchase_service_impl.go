@@ -13,10 +13,10 @@ type PurchaseServiceImpl struct {
     PurchaseRepo domain.PurchaseRepository
 }
 
-func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address string) error {
+func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address string) (string, error) {
     userObjectID, err := bson.ObjectIDFromHex(userID)
     if err != nil {
-        return errors.New("invalid user ID format")
+        return "", errors.New("invalid user ID format")
     }
 
     purchase := domain.Purchase{
@@ -29,7 +29,7 @@ func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address 
         Address:   address,
     }
 
-    return s.PurchaseRepo.Create(purchase)
+    return purchase.ID.Hex(), s.PurchaseRepo.Create(purchase)
 }
 
 func (s *PurchaseServiceImpl) ConfirmPayment(purchaseID string) error {
