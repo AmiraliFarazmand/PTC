@@ -19,9 +19,21 @@ func (r *MongoUserRepository) Create(user domain.User) error {
 }
 
 func (r *MongoUserRepository) FindByUsername(username string) (domain.User, error) {
+	var result struct {
+		ID       bson.ObjectID `bson:"_id"`	
+		Username string        `bson:"username"`
+		Password string        `bson:"password"`
+	}
 	var user domain.User
-	err := r.Collection.FindOne(context.TODO(), bson.M{"username": username}).Decode(&user)
-	log.Println(user, err)
+	err := r.Collection.FindOne(context.TODO(), bson.M{"username": username}).Decode(&result)
+	if err != nil {
+		log.Println("In FindByUsername method", err)
+		return user, err
+	}
+	user.ID = result.ID.Hex()
+	user.Username = result.Username
+	user.Password = result.Password
+	log.Println("FindByUsername", user, err)
 	return user, err
 }
 
