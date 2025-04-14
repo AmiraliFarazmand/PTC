@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/domain"
@@ -41,16 +42,19 @@ func (r *MongoPurchaseRepository) FindByID(id string) (domain.Purchase, error) {
 	return purchase, err
 }
 
-func (r *MongoPurchaseRepository) UpdateStatus(id string, status string, paymentID string) error {
+func (r *MongoPurchaseRepository) UpdateStatus(id string, status string, paymentID string, userID string) error {
 	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
-	_, err = r.Collection.UpdateOne(
+	updateResult, err := r.Collection.UpdateOne(
 		context.TODO(),
-		bson.M{"_id": objectID},
+		bson.M{"_id": objectID, "user_id": userID},
 		bson.M{"$set": bson.M{"status": status, "payment_id": paymentID}},
 	)
+	if updateResult.MatchedCount == 0 {
+		return fmt.Errorf("no purchase found with this ID for current user")
+	}
 	return err
 }
 

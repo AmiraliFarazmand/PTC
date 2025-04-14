@@ -15,7 +15,19 @@ func (s *GinServer) confirmPayment(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "Invalid request body"})
 		return
 	}
-	err := s.PurchaseService.ConfirmPayment(body.PurchaseID)
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
+		return
+	}
+
+	userObj, ok := user.(domain.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cast user"})
+		return
+	}
+
+	err := s.PurchaseService.ConfirmPayment(body.PurchaseID, userObj.ID)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return

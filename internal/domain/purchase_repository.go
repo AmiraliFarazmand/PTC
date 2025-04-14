@@ -18,6 +18,6 @@ type Purchase struct {
 type PurchaseRepository interface {
     Create(purchase Purchase) error
     FindByID(id string) (Purchase, error)
-    UpdateStatus(id string, status string, paymentID string) error
+    UpdateStatus(id string, status string, paymentID string, userID string) error
     CancelOldUnpaid(cutoff time.Time) (int64, error)
 }
