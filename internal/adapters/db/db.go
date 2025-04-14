@@ -7,6 +7,7 @@ import (
 	"github.com/AmiraliFarazmand/PTC_Task/internal/domain"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type MongoUserRepository struct {
@@ -69,4 +70,13 @@ func (r *MongoUserRepository) IsUsernameUnique(username string) (bool, error) {
 		return false, err
 	}
 	return count == 0, nil
+}
+
+
+func InitializeMongoDB(uri string) *mongo.Client {
+    client, err := mongo.Connect(options.Client().ApplyURI(uri))
+    if err != nil {
+        log.Fatalf("Failed to connect to MongoDB: %v", err)
+    }
+    return client
 }
