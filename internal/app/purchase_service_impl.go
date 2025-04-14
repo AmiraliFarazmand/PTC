@@ -1,12 +1,10 @@
 package app
 
 import (
-    "errors"
-    "time"
+	"time"
 
-    "github.com/AmiraliFarazmand/PTC_Task/internal/domain"
-    // "github.com/AmiraliFarazmand/PTC_Task/internal/ports"
-    "go.mongodb.org/mongo-driver/v2/bson"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/domain"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/utils"
 )
 
 type PurchaseServiceImpl struct {
@@ -14,14 +12,12 @@ type PurchaseServiceImpl struct {
 }
 
 func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address string) (string, error) {
-    userObjectID, err := bson.ObjectIDFromHex(userID)
-    if err != nil {
-        return "", errors.New("invalid user ID format")
-    }
+  
+    purchaseID := utils.GenerateRandomID()
 
     purchase := domain.Purchase{
-        ID:        bson.NewObjectID(),
-        UserID:    userObjectID,
+        ID:        purchaseID,
+        UserID:    userID,
         Amount:    amount,
         CreatedAt: time.Now(),
         Status:    "pending",
@@ -29,23 +25,19 @@ func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address 
         Address:   address,
     }
 
-    return purchase.ID.Hex(), s.PurchaseRepo.Create(purchase)
+    return purchaseID, s.PurchaseRepo.Create(purchase)
 }
 
 func (s *PurchaseServiceImpl) ConfirmPayment(purchaseID string) error {
-    purchaseObjectID, err := bson.ObjectIDFromHex(purchaseID)
-    if err != nil {
-        return errors.New("invalid purchase ID format")
-    }
 
-    paymentID := generatePaymentID() // Generate a random payment ID
-    return s.PurchaseRepo.UpdateStatus(purchaseObjectID, "packaging and delivering", paymentID)
+    paymentID := generatePaymentID(purchaseID) 
+    return s.PurchaseRepo.UpdateStatus(purchaseID, "packaging and delivering", paymentID)
 }
 
 func (s *PurchaseServiceImpl) CancelUnpaidPurchases(cutoff time.Time) (int64, error) {
     return s.PurchaseRepo.CancelOldUnpaid(cutoff)
 }
 
-func generatePaymentID() string {
-    return "PAY-" + bson.NewObjectID().Hex()
+func generatePaymentID(purchaseID string) string {
+    return "PAY-" + purchaseID + utils.RandSeq(10)
 }

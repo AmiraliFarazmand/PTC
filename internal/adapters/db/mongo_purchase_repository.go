@@ -1,49 +1,70 @@
 package db
 
 import (
-    "context"
-    "time"
+	"context"
+	"time"
 
-    "github.com/AmiraliFarazmand/PTC_Task/internal/domain"
-    "go.mongodb.org/mongo-driver/v2/bson"
-    "go.mongodb.org/mongo-driver/v2/mongo"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/domain"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type MongoPurchaseRepository struct {
-    Collection *mongo.Collection
+	Collection *mongo.Collection
 }
 
 func (r *MongoPurchaseRepository) Create(purchase domain.Purchase) error {
-    _, err := r.Collection.InsertOne(context.TODO(), purchase)
-    return err
+	purchaseID, err := bson.ObjectIDFromHex(purchase.ID)
+	if err != nil {
+		return err
+	}
+	purchaseDoc := bson.M{
+		"_id":        purchaseID,
+		"user_id":    purchase.UserID,
+		"amount":     purchase.Amount,
+		"created_at": purchase.CreatedAt,
+		"status":     purchase.Status,
+		"payment_id": purchase.PaymentID,
+		"address":    purchase.Address,
+	}
+	_, err = r.Collection.InsertOne(context.TODO(), purchaseDoc)
+	return err
 }
 
-func (r *MongoPurchaseRepository) FindByID(id bson.ObjectID) (domain.Purchase, error) {
-    var purchase domain.Purchase
-    err := r.Collection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&purchase)
-    return purchase, err
+func (r *MongoPurchaseRepository) FindByID(id string) (domain.Purchase, error) {
+	var purchase domain.Purchase
+	objectID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return purchase, err
+	}
+	err = r.Collection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&purchase)
+	return purchase, err
 }
 
-func (r *MongoPurchaseRepository) UpdateStatus(id bson.ObjectID, status string, paymentID string) error {
-    _, err := r.Collection.UpdateOne(
-        context.TODO(),
-        bson.M{"_id": id},
-        bson.M{"$set": bson.M{"status": status, "payment_id": paymentID}},
-    )
-    return err
+func (r *MongoPurchaseRepository) UpdateStatus(id string, status string, paymentID string) error {
+	objectID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	_, err = r.Collection.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": objectID},
+		bson.M{"$set": bson.M{"status": status, "payment_id": paymentID}},
+	)
+	return err
 }
 
 func (r *MongoPurchaseRepository) CancelOldUnpaid(cutoff time.Time) (int64, error) {
-    filter := bson.M{
-        "status":    "pending",
-        "created_at": bson.M{"$lt": cutoff},
-    }
-    update := bson.M{
-        "$set": bson.M{"status": "cancelled"},
-    }
-    result, err := r.Collection.UpdateMany(context.TODO(), filter, update)
-    if err != nil {
-        return 0, err
-    }
-    return result.ModifiedCount, nil
+	filter := bson.M{
+		"status":     "pending",
+		"created_at": bson.M{"$lt": cutoff},
+	}
+	update := bson.M{
+		"$set": bson.M{"status": "cancelled"},
+	}
+	result, err := r.Collection.UpdateMany(context.TODO(), filter, update)
+	if err != nil {
+		return 0, err
+	}
+	return result.ModifiedCount, nil
 }

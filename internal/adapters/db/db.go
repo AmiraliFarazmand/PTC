@@ -17,7 +17,6 @@ func (r *MongoUserRepository) Create(user domain.User) error {
 	_, err := r.Collection.InsertOne(context.TODO(), user)
 	return err
 }
-
 func (r *MongoUserRepository) FindByUsername(username string) (domain.User, error) {
 	var result struct {
 		ID       bson.ObjectID `bson:"_id"`	
