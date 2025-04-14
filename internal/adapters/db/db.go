@@ -15,7 +15,13 @@ type MongoUserRepository struct {
 }
 
 func (r *MongoUserRepository) Create(user domain.User) error {
-	_, err := r.Collection.InsertOne(context.TODO(), user)
+    objectID := bson.NewObjectID()
+    // user.ID = objectID.Hex() 
+	_, err := r.Collection.InsertOne(context.TODO(), bson.M{
+		"_id":      objectID,
+		"username": user.Username,
+		"password": user.Password,
+	})
 	return err
 }
 func (r *MongoUserRepository) FindByUsername(username string) (domain.User, error) {
