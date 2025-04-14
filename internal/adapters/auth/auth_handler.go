@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/AmiraliFarazmand/PTC_Task/internal/app"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/domain"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -15,7 +15,7 @@ import (
 const tokenExpireTime int = 72
 
 type AuthHandler struct {
-	UserService *app.UserServiceImpl
+	UserService ports.UserService
 }
 
 func (h *AuthHandler) Signup(c *gin.Context) {
@@ -109,7 +109,7 @@ func (h *AuthHandler) ValidateHnadler(c *gin.Context) {
 	})
 }
 
-func validateClaims(claims jwt.MapClaims, userService *app.UserServiceImpl) (domain.User, bool) {
+func validateClaims(claims jwt.MapClaims, userService ports.UserService) (domain.User, bool) {
 	// Check if the token is expired
 	if float64(time.Now().Unix()) > claims["exp"].(float64) {
 		return domain.User{}, false

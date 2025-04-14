@@ -4,13 +4,13 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/AmiraliFarazmand/PTC_Task/internal/app"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type AuthMiddleware struct {
-	UserService *app.UserServiceImpl
+	UserService *ports.UserService
 	SecretKey   string
 }
 
