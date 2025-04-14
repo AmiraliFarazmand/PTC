@@ -29,7 +29,6 @@ func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address 
 }
 
 func (s *PurchaseServiceImpl) ConfirmPayment(purchaseID string) error {
-
     paymentID := generatePaymentID(purchaseID) 
     return s.PurchaseRepo.UpdateStatus(purchaseID, "packaging and delivering", paymentID)
 }
