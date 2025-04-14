@@ -8,7 +8,7 @@ import (
 
 func main() {
 	// Initialize MongoDB
-	client := db.Inti("mongodb://localhost:27017")
+	client := db.InitializeMongoDB("mongodb://localhost:27017")
 
 	// Initialize services
 	purchaseService, userService := app.InitializeServices(client)
