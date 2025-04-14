@@ -4,14 +4,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type AuthMiddleware struct {
-	UserService *ports.UserService
-	SecretKey   string
+	SecretKey string
 }
 
 func (m *AuthMiddleware) RequireAuth(c *gin.Context) {
@@ -25,7 +23,7 @@ func (m *AuthMiddleware) RequireAuth(c *gin.Context) {
 
 	// Extract the token from the header
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	if tokenString == authHeader { // No "Bearer " prefix
+	if tokenString == authHeader {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Authorization header format"})
 		c.Abort()
 		return

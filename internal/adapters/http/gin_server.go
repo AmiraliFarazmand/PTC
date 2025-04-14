@@ -29,7 +29,7 @@ func (s *GinServer) Start() {
 	r.GET("/validate", authHandler.RequireAuth, authHandler.ValidateHnadler)
 	// Purchase routes
 	r.POST("/purchase", authHandler.RequireAuth, s.processPurchase)
-	r.POST("/purchase/pay", authHandler.RequireAuth, s.confirmPayment)
+	r.PUT("/purchase/pay", authHandler.RequireAuth, s.confirmPayment)
 
 	// Start the server
 	r.Run(":8080")
