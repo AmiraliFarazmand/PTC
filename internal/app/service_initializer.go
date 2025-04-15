@@ -2,7 +2,7 @@ package app
 
 import (
     "github.com/AmiraliFarazmand/PTC_Task/internal/adapters/db"
-    "go.mongodb.org/mongo-driver/v2/mongo"
+    "go.mongodb.org/mongo-driver/v2/mongo"  //adaptor bayad bashe na mongo
 )
 
 func InitializeServices(client *mongo.Client) (PurchaseServiceImpl, UserServiceImpl) {

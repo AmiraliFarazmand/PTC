@@ -79,7 +79,7 @@ func (r *MongoUserRepository) IsUsernameUnique(username string) (bool, error) {
 }
 
 
-func InitializeMongoDB(uri string) *mongo.Client {
+func InitializeMongoDB(uri string) *mongo.Client { //newmogodb - > esm function: naming conventional in go
     client, err := mongo.Connect(options.Client().ApplyURI(uri))
     if err != nil {
         log.Fatalf("Failed to connect to MongoDB: %v", err)
