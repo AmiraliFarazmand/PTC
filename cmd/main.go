@@ -11,7 +11,8 @@ func main() {
 	client := db.InitializeMongoDB("mongodb://localhost:27017")
 
 	// Initialize services
-	purchaseService, userService := app.InitializeServices(client) //point2<:joda bashan behtare
+	userService := app.InitializeUserService(client) 
+	purchaseService := app.InitializePurchaseService(client) 
 
 	// Initialize and start HTTP server
 	server := http.InitializeHTTPServer(purchaseService, userService)

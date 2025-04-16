@@ -5,17 +5,14 @@ import (
     "go.mongodb.org/mongo-driver/v2/mongo"  //adaptor bayad bashe na mongo
 )
 
-func InitializeServices(client *mongo.Client) (PurchaseServiceImpl, UserServiceImpl) {
+func InitializePurchaseService(client *mongo.Client) PurchaseServiceImpl {
     purchaseCollection := client.Database("ParsTasmimDB").Collection("Purchases")
-    userCollection := client.Database("ParsTasmimDB").Collection("Users")
-
-    // Initialize repositories
     purchaseRepo := &db.MongoPurchaseRepository{Collection: purchaseCollection}
+    return PurchaseServiceImpl{PurchaseRepo: purchaseRepo}
+}
+
+func InitializeUserService(client *mongo.Client) UserServiceImpl {
+    userCollection := client.Database("ParsTasmimDB").Collection("Users")
     userRepo := &db.MongoUserRepository{Collection: userCollection}
-
-    // Initialize services
-    purchaseService := PurchaseServiceImpl{PurchaseRepo: purchaseRepo}
-    userService := UserServiceImpl{UserRepo: userRepo}
-
-    return purchaseService, userService
+    return UserServiceImpl{UserRepo: userRepo}
 }
