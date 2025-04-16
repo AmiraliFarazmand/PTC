@@ -22,7 +22,7 @@ func (s *GinServer) Start() {
 	r := gin.Default()
 
 	// User routes
-	authHandler := auth.AuthHandler{UserService: &s.UserService}
+	authHandler := auth.NewAuthHandler(&s.UserService)
 	//authentication routes
 	r.POST("/signup", authHandler.Signup)
 	r.POST("/login", authHandler.Login)

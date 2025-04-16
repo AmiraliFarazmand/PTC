@@ -18,6 +18,12 @@ type AuthHandler struct {
 	UserService ports.UserService
 }
 
+func NewAuthHandler(userService ports.UserService) *AuthHandler {
+	return &AuthHandler{
+		UserService: userService,
+	}
+}
+
 func (h *AuthHandler) Signup(c *gin.Context) {
 	var body struct {
 		Username string `json:"username"`
