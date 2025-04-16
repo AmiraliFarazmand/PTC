@@ -9,9 +9,10 @@ import (
 func main() {
 	// Initialize MongoDB
 	client := db.NewMongoDB("mongodb://localhost:27017")
+
 	// Create repositories
-	userRepo := &db.MongoUserRepository{Collection: client.Database("ParsTasmimDB").Collection("Users")}
-	purchaseRepo := &db.MongoPurchaseRepository{Collection: client.Database("ParsTasmimDB").Collection("Purchases")}
+	userRepo := db.NewMongoUserRepository(client.Database("ParsTasmimDB").Collection("Users"))
+	purchaseRepo := db.NewMongoPurchaseRepository(client.Database("ParsTasmimDB").Collection("Purchases"))
 
 	// Initialize services
 	userService := app.InitializeUserService(userRepo)

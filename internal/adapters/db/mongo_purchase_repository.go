@@ -14,6 +14,10 @@ type MongoPurchaseRepository struct {
 	Collection *mongo.Collection
 }
 
+func NewMongoPurchaseRepository(collection *mongo.Collection) *MongoPurchaseRepository {
+	return &MongoPurchaseRepository{Collection: collection}
+}
+
 func (r *MongoPurchaseRepository) Create(purchase domain.Purchase) error {
 	purchaseID, err := bson.ObjectIDFromHex(purchase.ID)
 	if err != nil {

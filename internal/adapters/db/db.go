@@ -14,8 +14,11 @@ type MongoUserRepository struct {
 	Collection *mongo.Collection
 }
 
+func NewMongoUserRepository(collection *mongo.Collection) *MongoUserRepository {
+	return &MongoUserRepository{Collection: collection}
+}
 func (r *MongoUserRepository) Create(user domain.User) error {
-    objectID := bson.NewObjectID()
+	objectID := bson.NewObjectID()
 	_, err := r.Collection.InsertOne(context.TODO(), bson.M{
 		"_id":      objectID,
 		"username": user.Username,
@@ -25,7 +28,7 @@ func (r *MongoUserRepository) Create(user domain.User) error {
 }
 func (r *MongoUserRepository) FindByUsername(username string) (domain.User, error) {
 	var result struct {
-		ID       bson.ObjectID `bson:"_id"`	
+		ID       bson.ObjectID `bson:"_id"`
 		Username string        `bson:"username"`
 		Password string        `bson:"password"`
 	}
@@ -46,7 +49,7 @@ func (r *MongoUserRepository) FindByID(id string) (domain.User, error) {
 	var result struct {
 		ID       bson.ObjectID `bson:"_id"`
 		Username string        `bson:"username"`
-		Password string 		`bson:"password"`
+		Password string        `bson:"password"`
 	}
 	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
@@ -77,11 +80,10 @@ func (r *MongoUserRepository) IsUsernameUnique(username string) (bool, error) {
 	return count == 0, nil
 }
 
-
-func NewMongoDB(uri string) *mongo.Client { 
-    client, err := mongo.Connect(options.Client().ApplyURI(uri))
-    if err != nil {
-        log.Fatalf("Failed to connect to MongoDB: %v", err)
-    }
-    return client
+func NewMongoDB(uri string) *mongo.Client {
+	client, err := mongo.Connect(options.Client().ApplyURI(uri))
+	if err != nil {
+		log.Fatalf("Failed to connect to MongoDB: %v", err)
+	}
+	return client
 }
