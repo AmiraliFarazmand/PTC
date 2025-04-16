@@ -16,9 +16,7 @@
     <bpmn:sequenceFlow id="Flow_0qlbzyj" sourceRef="create_new_user_task" targetRef="send_success_user_creation_revent" />
     <bpmn:sequenceFlow id="Flow_0ucvutx" sourceRef="StartEvent_1" targetRef="user_submits_usernaem_password_task" />
     <bpmn:sequenceFlow id="Flow_1r64rs3" sourceRef="validate_username_password_task" targetRef="gateway_username_password_valid" />
-    <bpmn:sequenceFlow id="user_creation_failed_flow" name="No" sourceRef="gateway_username_password_valid" targetRef="event_send_error_respond">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=#{UserValidation==true}</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="user_creation_failed_flow" name="No" sourceRef="gateway_username_password_valid" targetRef="event_send_error_respond" />
     <bpmn:endEvent id="event_send_error_respond" name="send erorr respond">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="respond_failed_signup" />
@@ -45,7 +43,7 @@
     </bpmn:userTask>
     <bpmn:serviceTask id="validate_username_password_task" name="Validate username, password">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="validate_username_password" />
+        <zeebe:taskDefinition type="&#34;bool&#34;" />
         <zeebe:ioMapping>
           <zeebe:output target="OutputVariable_1rrkbcg" />
         </zeebe:ioMapping>
