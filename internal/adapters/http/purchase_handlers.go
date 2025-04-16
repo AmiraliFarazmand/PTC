@@ -3,7 +3,7 @@ package http
 import (
 	"net/http"
 
-	"github.com/AmiraliFarazmand/PTC_Task/internal/domain"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
 	"github.com/gin-gonic/gin"
 )
 

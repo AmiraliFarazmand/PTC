@@ -2,7 +2,7 @@ package http
 
 import (
 	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/auth"
-	"github.com/AmiraliFarazmand/PTC_Task/internal/app"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/core/app"
 	"github.com/gin-gonic/gin"
 )
 

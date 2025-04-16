@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/db"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/http"
-	"github.com/AmiraliFarazmand/PTC_Task/internal/app"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/core/app"
 )
 
 func main() {
@@ -23,6 +23,5 @@ func main() {
 	server.Start()
 }
 
-// p3: core: app+ domain
 
 // search for naming conventional in go

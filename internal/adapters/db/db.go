@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/AmiraliFarazmand/PTC_Task/internal/domain"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"

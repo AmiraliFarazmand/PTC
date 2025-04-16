@@ -3,7 +3,7 @@ package app
 import (
 	"time"
 
-	"github.com/AmiraliFarazmand/PTC_Task/internal/domain"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/utils"
 )
 

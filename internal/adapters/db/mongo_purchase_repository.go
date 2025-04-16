@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/AmiraliFarazmand/PTC_Task/internal/domain"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )

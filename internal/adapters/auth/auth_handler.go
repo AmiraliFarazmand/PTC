@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/AmiraliFarazmand/PTC_Task/internal/domain"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/utils"
 	"github.com/gin-gonic/gin"
