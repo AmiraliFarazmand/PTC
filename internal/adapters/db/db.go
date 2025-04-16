@@ -16,7 +16,6 @@ type MongoUserRepository struct {
 
 func (r *MongoUserRepository) Create(user domain.User) error {
     objectID := bson.NewObjectID()
-    // user.ID = objectID.Hex() 
 	_, err := r.Collection.InsertOne(context.TODO(), bson.M{
 		"_id":      objectID,
 		"username": user.Username,
@@ -79,7 +78,7 @@ func (r *MongoUserRepository) IsUsernameUnique(username string) (bool, error) {
 }
 
 
-func InitializeMongoDB(uri string) *mongo.Client { //newmogodb - > esm function: naming conventional in go
+func NewMongoDB(uri string) *mongo.Client { 
     client, err := mongo.Connect(options.Client().ApplyURI(uri))
     if err != nil {
         log.Fatalf("Failed to connect to MongoDB: %v", err)

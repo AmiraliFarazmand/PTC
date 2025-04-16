@@ -8,14 +8,20 @@ import (
 
 func main() {
 	// Initialize MongoDB
-	client := db.InitializeMongoDB("mongodb://localhost:27017")
+	client := db.NewMongoDB("mongodb://localhost:27017")
+	// Create repositories
+	userRepo := &db.MongoUserRepository{Collection: client.Database("ParsTasmimDB").Collection("Users")}
+	purchaseRepo := &db.MongoPurchaseRepository{Collection: client.Database("ParsTasmimDB").Collection("Purchases")}
 
 	// Initialize services
-	userService := app.InitializeUserService(client) 
-	purchaseService := app.InitializePurchaseService(client) 
+	userService := app.InitializeUserService(userRepo)
+	purchaseService := app.InitializePurchaseService(purchaseRepo)
 
 	// Initialize and start HTTP server
 	server := http.InitializeHTTPServer(purchaseService, userService)
 	server.Start()
 }
+
 // p3: core: app+ domain
+
+// search for naming conventional in go

@@ -1,18 +1,11 @@
 package app
 
-import (
-    "github.com/AmiraliFarazmand/PTC_Task/internal/adapters/db"
-    "go.mongodb.org/mongo-driver/v2/mongo"  //adaptor bayad bashe na mongo
-)
+import "github.com/AmiraliFarazmand/PTC_Task/internal/domain"
 
-func InitializePurchaseService(client *mongo.Client) PurchaseServiceImpl {
-    purchaseCollection := client.Database("ParsTasmimDB").Collection("Purchases")
-    purchaseRepo := &db.MongoPurchaseRepository{Collection: purchaseCollection}
+func InitializePurchaseService(purchaseRepo domain.PurchaseRepository) PurchaseServiceImpl {
     return PurchaseServiceImpl{PurchaseRepo: purchaseRepo}
 }
 
-func InitializeUserService(client *mongo.Client) UserServiceImpl {
-    userCollection := client.Database("ParsTasmimDB").Collection("Users")
-    userRepo := &db.MongoUserRepository{Collection: userCollection}
+func InitializeUserService(userRepo domain.UserRepository) UserServiceImpl {
     return UserServiceImpl{UserRepo: userRepo}
 }
