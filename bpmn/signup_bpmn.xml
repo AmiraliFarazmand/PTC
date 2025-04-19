@@ -1,125 +1,104 @@
-
-
-
-<!-- Signup Version 1.0 -->
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_12o6g61" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.33.1" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.6.0">
-  <bpmn:process id="user_signup_process" name="User signup" isExecutable="true">
-    <bpmn:serviceTask id="create_new_user_task" name="create new User">
-      <bpmn:extensionElements>
-        <zeebe:taskDefinition type="create_new_user_in_db" />
-      </bpmn:extensionElements>
-      <bpmn:incoming>user_creation_succcess_flow</bpmn:incoming>
-      <bpmn:outgoing>Flow_0qlbzyj</bpmn:outgoing>
-    </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_080b1zo" sourceRef="user_submits_usernaem_password_task" targetRef="validate_username_password_task" />
-    <bpmn:sequenceFlow id="Flow_0qlbzyj" sourceRef="create_new_user_task" targetRef="send_success_user_creation_revent" />
-    <bpmn:sequenceFlow id="Flow_0ucvutx" sourceRef="StartEvent_1" targetRef="user_submits_usernaem_password_task" />
-    <bpmn:sequenceFlow id="Flow_1r64rs3" sourceRef="validate_username_password_task" targetRef="gateway_username_password_valid" />
-    <bpmn:sequenceFlow id="user_creation_failed_flow" name="No" sourceRef="gateway_username_password_valid" targetRef="event_send_error_respond" />
-    <bpmn:endEvent id="event_send_error_respond" name="send erorr respond">
-      <bpmn:extensionElements>
-        <zeebe:taskDefinition type="respond_failed_signup" />
-      </bpmn:extensionElements>
-      <bpmn:incoming>user_creation_failed_flow</bpmn:incoming>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_0ez47iu" />
-    </bpmn:endEvent>
-    <bpmn:endEvent id="send_success_user_creation_revent" name="send successful respond">
-      <bpmn:extensionElements>
-        <zeebe:taskDefinition type="respond_success_signup" />
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_0qlbzyj</bpmn:incoming>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_0qj3suu" />
-    </bpmn:endEvent>
-    <bpmn:startEvent id="StartEvent_1">
-      <bpmn:outgoing>Flow_0ucvutx</bpmn:outgoing>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.0.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.2.0">
+  <bpmn:process id="SignupProcess" name="User Signup Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1" name="Signup Request">
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:userTask id="user_submits_usernaem_password_task" name="User submits usrname and password">
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_ValidateCredentials" />
+    <bpmn:serviceTask id="Task_ValidateCredentials" name="Validate Credentials">
       <bpmn:extensionElements>
-        <zeebe:userTask />
+        <zeebe:taskDefinition type="validate-credentials" />
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_0ucvutx</bpmn:incoming>
-      <bpmn:outgoing>Flow_080b1zo</bpmn:outgoing>
-    </bpmn:userTask>
-    <bpmn:serviceTask id="validate_username_password_task" name="Validate username, password">
-      <bpmn:extensionElements>
-        <zeebe:taskDefinition type="&#34;bool&#34;" />
-        <zeebe:ioMapping>
-          <zeebe:output target="OutputVariable_1rrkbcg" />
-        </zeebe:ioMapping>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_080b1zo</bpmn:incoming>
-      <bpmn:outgoing>Flow_1r64rs3</bpmn:outgoing>
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:exclusiveGateway id="gateway_username_password_valid" name="was the username,password valid">
-      <bpmn:incoming>Flow_1r64rs3</bpmn:incoming>
-      <bpmn:outgoing>user_creation_succcess_flow</bpmn:outgoing>
-      <bpmn:outgoing>user_creation_failed_flow</bpmn:outgoing>
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_ValidateCredentials" targetRef="Gateway_1" />
+    <bpmn:exclusiveGateway id="Gateway_1" name="Credentials Valid?">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_Valid</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Invalid</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="user_creation_succcess_flow" name="yes" sourceRef="gateway_username_password_valid" targetRef="create_new_user_task" />
+    <bpmn:sequenceFlow id="Flow_Valid" name="Yes" sourceRef="Gateway_1" targetRef="Task_CreateUser">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isValid = true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_Invalid" name="No" sourceRef="Gateway_1" targetRef="Event_Failed">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isValid = false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="Task_CreateUser" name="Create User">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="create-user" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Valid</bpmn:incoming>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="Event_Success" name="Signup Success">
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="Event_Failed" name="Signup Failed">
+      <bpmn:incoming>Flow_Invalid</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Task_CreateUser" targetRef="Event_Success" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="user_signup_process">
-      <bpmndi:BPMNShape id="Activity_0iufuho_di" bpmnElement="create_new_user_task">
-        <dc:Bounds x="940" y="200" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1e2r939_di" bpmnElement="event_send_error_respond">
-        <dc:Bounds x="1162" y="82" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1156" y="125" width="52" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0plb8my_di" bpmnElement="send_success_user_creation_revent">
-        <dc:Bounds x="1162" y="222" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1143" y="265" width="79" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="SignupProcess">
       <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
-        <dc:Bounds x="182" y="222" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0saxo55_di" bpmnElement="user_submits_usernaem_password_task">
-        <dc:Bounds x="360" y="200" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_01lsu3r_di" bpmnElement="validate_username_password_task">
-        <dc:Bounds x="580" y="200" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_1l2q1lp_di" bpmnElement="gateway_username_password_valid" isMarkerVisible="true">
-        <dc:Bounds x="805" y="215" width="50" height="50" />
+        <dc:Bounds x="179" y="159" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="792" y="272" width="85" height="40" />
+          <dc:Bounds x="161" y="202" width="73" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_080b1zo_di" bpmnElement="Flow_080b1zo">
-        <di:waypoint x="460" y="240" />
-        <di:waypoint x="580" y="240" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0qlbzyj_di" bpmnElement="Flow_0qlbzyj">
-        <di:waypoint x="1040" y="240" />
-        <di:waypoint x="1162" y="240" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0ucvutx_di" bpmnElement="Flow_0ucvutx">
-        <di:waypoint x="218" y="240" />
-        <di:waypoint x="360" y="240" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1r64rs3_di" bpmnElement="Flow_1r64rs3">
-        <di:waypoint x="680" y="240" />
-        <di:waypoint x="805" y="240" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1n79oxg_di" bpmnElement="user_creation_failed_flow">
-        <di:waypoint x="830" y="215" />
-        <di:waypoint x="830" y="100" />
-        <di:waypoint x="1162" y="100" />
+      <bpmndi:BPMNShape id="Activity_0k7qn5p_di" bpmnElement="Task_ValidateCredentials">
+        <dc:Bounds x="270" y="137" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1_di" bpmnElement="Gateway_1" isMarkerVisible="true">
+        <dc:Bounds x="425" y="152" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="838" y="155" width="15" height="14" />
+          <dc:Bounds x="408" y="122" width="84" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1m5h9kl_di" bpmnElement="Task_CreateUser">
+        <dc:Bounds x="530" y="137" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_Success_di" bpmnElement="Event_Success">
+        <dc:Bounds x="692" y="159" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="673" y="202" width="75" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_Failed_di" bpmnElement="Event_Failed">
+        <dc:Bounds x="692" y="272" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="677" y="315" width="67" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+        <di:waypoint x="215" y="177" />
+        <di:waypoint x="270" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="370" y="177" />
+        <di:waypoint x="425" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Valid_di" bpmnElement="Flow_Valid">
+        <di:waypoint x="475" y="177" />
+        <di:waypoint x="530" y="177" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="494" y="159" width="18" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0ghm126_di" bpmnElement="user_creation_succcess_flow">
-        <di:waypoint x="855" y="240" />
-        <di:waypoint x="940" y="240" />
+      <bpmndi:BPMNEdge id="Flow_Invalid_di" bpmnElement="Flow_Invalid">
+        <di:waypoint x="450" y="202" />
+        <di:waypoint x="450" y="290" />
+        <di:waypoint x="692" y="290" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="889" y="222" width="17" height="14" />
+          <dc:Bounds x="458" y="243" width="15" height="14" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
+        <di:waypoint x="630" y="177" />
+        <di:waypoint x="692" y="177" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

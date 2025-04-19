@@ -32,5 +32,5 @@ func (s *GinServer) Start() {
 	r.PUT("/purchase/pay", authHandler.RequireAuth, s.confirmPayment)
 
 	// Start the server
-	r.Run(":8080")
+	r.Run(":8090")
 }
