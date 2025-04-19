@@ -83,8 +83,7 @@ func createToken(userID string) (string, error) {
 		"sub": userID,
 		"exp": time.Now().Add(time.Hour * time.Duration(tokenExpireTime)).Unix(),
 	})
-	// TODO: should be stored in an environment variable or a config file
-	secretKey := "SomeRandomSecretKeyjsdfijsdfiojsjiofjsofhsidhfuiwhehwuifhwwiufhxciuv"
+	secretKey, _ := utils.ReadEnv("SECRET_KEY")
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		return "", err
@@ -150,7 +149,7 @@ func (h *AuthHandler) RequireAuth(c *gin.Context) {
 		}
 
 		// TODO: move this to an env file
-		secretKey := "SomeRandomSecretKeyjsdfijsdfiojsjiofjsofhsidhfuiwhehwuifhwwiufhxciuv"
+		secretKey, _ := utils.ReadEnv("SECRET_KEY")
 		return []byte(secretKey), nil
 	})
 	if err != nil {

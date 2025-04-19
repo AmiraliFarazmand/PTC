@@ -3,6 +3,7 @@ package http
 import (
 	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/auth"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/core/app"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,5 +33,6 @@ func (s *GinServer) Start() {
 	r.PUT("/purchase/pay", authHandler.RequireAuth, s.confirmPayment)
 
 	// Start the server
-	r.Run(":8090")
+	ginPort, _ := utils.ReadEnv("GIN_PORT")
+	r.Run(":"+ginPort)
 }
