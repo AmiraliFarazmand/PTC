@@ -9,6 +9,7 @@ import (
 func NewZeebeClient() zbc.Client {
     client, err := zbc.NewClient(&zbc.ClientConfig{
         GatewayAddress: "localhost:26500", 
+        UsePlaintextConnection: true,
     })
     if err != nil {
         log.Fatalf("Failed to create Zeebe client: %v", err)
