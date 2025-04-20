@@ -1,0 +1,17 @@
+package zeebe
+
+import (
+    "log"
+
+    "github.com/camunda-community-hub/zeebe-client-go/v8/pkg/zbc"
+)
+
+func NewZeebeClient() zbc.Client {
+    client, err := zbc.NewClient(&zbc.ClientConfig{
+        GatewayAddress: "localhost:26500", 
+    })
+    if err != nil {
+        log.Fatalf("Failed to create Zeebe client: %v", err)
+    }
+    return client
+}
