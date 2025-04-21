@@ -21,7 +21,7 @@ func CreateUserWorker(client zbc.Client, userRepo *db.MongoUserRepository) {
             // Create user in the database
             err := userRepo.Create(domain.User{Username: username, Password: password})
             if err != nil {
-                log.Printf("Failed to create user: %v", err)
+                log.Printf("###ailed to create user: %v", err)
                 return
             }
 
@@ -30,9 +30,10 @@ func CreateUserWorker(client zbc.Client, userRepo *db.MongoUserRepository) {
                 JobKey(job.GetKey()).
                 Send(context.Background())
             if err != nil {
-                log.Printf("Failed to complete job: %v", err)
+                log.Printf("###Failed to complete job: %v", err)
             }
         }).
         Open()
+        log.Println("###CreateUserWorker started")
     defer jobWorker.Close()
 }

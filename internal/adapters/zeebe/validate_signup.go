@@ -8,11 +8,11 @@ import (
 )
 
 func DeploySignupProcess(client zbc.Client) {
-    _, err := client.NewDeployResourceCommand().
+    deployResouceRespond, err := client.NewDeployResourceCommand().
         AddResourceFile("bpmn/signup.bpmn").
         Send(context.Background())
     if err != nil {
-        log.Fatalf("Failed to deploy process: %v", err)
+        log.Fatalf("####Failed to deploy process: %v", err)
     }
-    log.Println("Signup process deployed successfully")
+    log.Printf("###Signup process deployed successfully %+v\n",deployResouceRespond)
 }

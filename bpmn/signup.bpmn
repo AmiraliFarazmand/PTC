@@ -5,9 +5,6 @@
     <bpmn:serviceTask id="Task_ValidateCredentials" name="Validate Credentials">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="validate-credentials" />
-        <zeebe:taskHeaders>
-          <zeebe:header key="zeebe:taskDefinitionType" value="&#34;validate-credentials&#34; " />
-        </zeebe:taskHeaders>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1</bpmn:incoming>
       <bpmn:outgoing>Flow_2</bpmn:outgoing>
