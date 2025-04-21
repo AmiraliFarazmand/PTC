@@ -3,6 +3,7 @@ package zeebe
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/entities"
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/worker"
@@ -33,6 +34,11 @@ func ValidateCredentialsWorker(client zbc.Client) {
 				log.Printf("###Failed to complete job: %v", err)
 			}
 		}).
+		Concurrency(1).
+		MaxJobsActive(10).
+		RequestTimeout(1 * time.Second).
+		PollInterval(1 * time.Second).
+		Name("validate-credential").
 		Open()
 	// defer jobWorker.Close()
 	log.Println("####Ended validate-credentials worker")
