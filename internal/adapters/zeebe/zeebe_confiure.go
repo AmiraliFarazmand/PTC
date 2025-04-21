@@ -17,3 +17,8 @@ func NewZeebeClient() zbc.Client {
     log.Printf("###Zeebe client created successfully %+v\n",client)
     return client
 }
+
+func MustCloseClient(client zbc.Client) {
+	log.Println("###closing client")
+	_ = client.Close()
+}

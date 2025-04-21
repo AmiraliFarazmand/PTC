@@ -22,7 +22,7 @@ func main() {
 	// userService:= app.InitializeUserService(userRepo)
 	// purchaseService := app.InitializePurchaseService(purchaseRepo)
 	zeebeClient := zeebe.NewZeebeClient()
-
+	defer zeebe.MustCloseClient(zeebeClient)
 	// Deploy BPMN process
 	zeebe.DeploySignupProcess(zeebeClient)
 	// Start workers
