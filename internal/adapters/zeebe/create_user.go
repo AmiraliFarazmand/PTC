@@ -10,18 +10,19 @@ import (
     "github.com/camunda-community-hub/zeebe-client-go/v8/pkg/worker"
     "github.com/camunda-community-hub/zeebe-client-go/v8/pkg/entities"
 )
-func CreateUserWorker(client zbc.Client, userRepo *db.MongoUserRepository) {
+func CreateUserWorker(client zbc.Client, userRepo *db.MongoUserRepository) worker.JobWorker {
     jobWorker := client.NewJobWorker().
         JobType("create-user").
         Handler(func(jobClient worker.JobClient, job entities.Job) {
             vars,_ := job.GetVariablesAsMap()
             username := vars["username"].(string)
             password := vars["password"].(string)
+            // isValid := vars["isValid"].(bool)
 
             // Create user in the database
             err := userRepo.Create(domain.User{Username: username, Password: password})
             if err != nil {
-                log.Printf("###ailed to create user: %v", err)
+                log.Printf("###failed to create user: %v", err)
                 return
             }
 
@@ -35,5 +36,6 @@ func CreateUserWorker(client zbc.Client, userRepo *db.MongoUserRepository) {
         }).
         Open()
         log.Println("###CreateUserWorker started")
-    defer jobWorker.Close()
+    // defer jobWorker.Close()
+    return jobWorker 
 }

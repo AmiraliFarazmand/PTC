@@ -1,9 +1,11 @@
 package main
 
 import (
+
 	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/db"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/zeebe"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/utils"
+	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/worker"
 	// "github.com/AmiraliFarazmand/PTC_Task/internal/core/app"
 	// "github.com/AmiraliFarazmand/PTC_Task/internal/adapters/http"
 )
@@ -26,12 +28,14 @@ func main() {
 	// Deploy BPMN process
 	zeebe.DeploySignupProcess(zeebeClient)
 	// Start workers
-	jobWorker :=zeebe.ValidateCredentialsWorker(zeebeClient)
-	defer jobWorker.Close()
-	go zeebe.CreateUserWorker(zeebeClient, userRepo)
+	var validateJobWorker, createUserJobWorker worker.JobWorker
 
+	validateJobWorker = zeebe.ValidateCredentialsWorker(zeebeClient)
+	createUserJobWorker = zeebe.CreateUserWorker(zeebeClient, userRepo)
+	defer validateJobWorker.Close()
+	defer createUserJobWorker.Close()
 	//create instance of the process
-	zeebe.MustStartProcessInstance(zeebeClient, "userNWWWWW","password")
+	zeebe.MustStartProcessInstance(zeebeClient, "userNW", "password")
 	// Initialize and start HTTP server
 	// server := http.InitializeHTTPServer(purchaseService, userService)
 	// server.Start()

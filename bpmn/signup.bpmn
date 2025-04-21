@@ -1,26 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.34.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.2.0">
   <bpmn:process id="SignupProcess" name="User Signup Process" isExecutable="true">
-    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_ValidateCredentials" />
-    <bpmn:serviceTask id="Task_ValidateCredentials" name="Validate Credentials">
-      <bpmn:extensionElements>
-        <zeebe:taskDefinition type="validate-credentials" />
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_1</bpmn:incoming>
-      <bpmn:outgoing>Flow_2</bpmn:outgoing>
-    </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_ValidateCredentials" targetRef="Gateway_1" />
-    <bpmn:exclusiveGateway id="Gateway_1" name="Credentials Valid?">
-      <bpmn:incoming>Flow_2</bpmn:incoming>
-      <bpmn:outgoing>Flow_Valid</bpmn:outgoing>
-      <bpmn:outgoing>Flow_Invalid</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_Valid" name="Yes" sourceRef="Gateway_1" targetRef="Task_CreateUser">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isValid = true</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_Invalid" name="No" sourceRef="Gateway_1" targetRef="Event_Failed">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isValid = false</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
     <bpmn:serviceTask id="Task_CreateUser" name="Create User">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="create-user" />
@@ -28,16 +8,36 @@
       <bpmn:incoming>Flow_Valid</bpmn:incoming>
       <bpmn:outgoing>Flow_3</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:endEvent id="Event_Success" name="Signup Success">
-      <bpmn:incoming>Flow_3</bpmn:incoming>
-    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="Gateway_1" name="Credentials Valid?">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_Valid</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Invalid</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_ValidateCredentials" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_ValidateCredentials" targetRef="Gateway_1" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Task_CreateUser" targetRef="Event_Success" />
+    <bpmn:sequenceFlow id="Flow_Invalid" name="No" sourceRef="Gateway_1" targetRef="Event_Failed">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isValid = false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
     <bpmn:endEvent id="Event_Failed" name="Signup Failed">
       <bpmn:incoming>Flow_Invalid</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_3" sourceRef="Task_CreateUser" targetRef="Event_Success" />
     <bpmn:startEvent id="StartEvent_1" name="Signup Request">
       <bpmn:outgoing>Flow_1</bpmn:outgoing>
     </bpmn:startEvent>
+    <bpmn:endEvent id="Event_Success" name="Signup Success">
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Task_ValidateCredentials" name="Validate Credentials">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="validate-credentials" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_Valid" name="Yes" sourceRef="Gateway_1" targetRef="Task_CreateUser">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isValid = true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="SignupProcess">
