@@ -26,9 +26,12 @@ func main() {
 	// Deploy BPMN process
 	zeebe.DeploySignupProcess(zeebeClient)
 	// Start workers
-	go zeebe.ValidateCredentialsWorker(zeebeClient)
+	jobWorker :=zeebe.ValidateCredentialsWorker(zeebeClient)
+	defer jobWorker.Close()
 	go zeebe.CreateUserWorker(zeebeClient, userRepo)
 
+	//create instance of the process
+	zeebe.MustStartProcessInstance(zeebeClient, "userNWWWWW","password")
 	// Initialize and start HTTP server
 	// server := http.InitializeHTTPServer(purchaseService, userService)
 	// server.Start()

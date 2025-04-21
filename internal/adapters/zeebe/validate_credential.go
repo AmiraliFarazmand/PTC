@@ -10,15 +10,15 @@ import (
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/zbc"
 )
 
-func ValidateCredentialsWorker(client zbc.Client) {
+func ValidateCredentialsWorker(client zbc.Client) worker.JobWorker{
 	log.Println("####Started validate-credentials worker")
 	jobWorker := client.NewJobWorker().
 		JobType("validate-credentials").
 		Handler(func(jobClient worker.JobClient, job entities.Job) {
 			vars, _ := job.GetVariablesAsMap()
-			log.Println("####On handler function", vars)
 			username := vars["username"].(string)
 			password := vars["password"].(string)
+			log.Println("####On handler function", vars, username, password)
 			// Validate credentials (example logic)
 			isValid := len(username) > 3 && len(password) > 6
 
@@ -42,5 +42,5 @@ func ValidateCredentialsWorker(client zbc.Client) {
 		Open()
 	// defer jobWorker.Close()
 	log.Println("####Ended validate-credentials worker")
-	defer jobWorker.Close()
+	return jobWorker
 }
