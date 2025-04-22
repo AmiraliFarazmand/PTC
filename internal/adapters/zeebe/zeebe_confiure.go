@@ -1,8 +1,6 @@
 package zeebe
 
 import (
-	// "log"
-
 	"log"
 
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/zbc"
@@ -21,6 +19,5 @@ func NewZeebeClient() zbc.Client {
 }
 
 func MustCloseClient(client zbc.Client) {
-	// log.Println("###closing client")
 	_ = client.Close()
 }

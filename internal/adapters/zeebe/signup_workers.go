@@ -13,7 +13,6 @@ import (
 )
 
 func ValidateCredentialsWorker(client zbc.Client) worker.JobWorker{
-	// log.Println("####Started validate-credentials worker")
 	jobWorker := client.NewJobWorker().
 		JobType("validate-credentials").
 		Handler(func(jobClient worker.JobClient, job entities.Job) {
@@ -42,8 +41,6 @@ func ValidateCredentialsWorker(client zbc.Client) worker.JobWorker{
 		PollInterval(1 * time.Second).
 		Name("validate-credential").
 		Open()
-	// defer jobWorker.Close()
-	// log.Println("####Ended validate-credentials worker")
 	return jobWorker
 }
 
@@ -55,9 +52,7 @@ func CreateUserWorker(client zbc.Client, userRepo *db.MongoUserRepository) worke
             vars,_ := job.GetVariablesAsMap()
             username := vars["username"].(string)
             password := vars["password"].(string)
-            // isValid := vars["isValid"].(bool)
-
-            // Create user in the database
+ 
             err := userRepo.Create(domain.User{Username: username, Password: password})
             if err != nil {
                 log.Printf("###failed to create user: %v", err)
@@ -73,7 +68,5 @@ func CreateUserWorker(client zbc.Client, userRepo *db.MongoUserRepository) worke
             }
         }).
         Open()
-        // log.Println("###CreateUserWorker started")
-    // defer jobWorker.Close()
     return jobWorker 
 }

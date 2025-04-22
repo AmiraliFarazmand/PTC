@@ -37,7 +37,7 @@ func main() {
     loginTokenWorker := zeebe.CreateLoginTokenWorker(zeebeClient)
     defer loginCheckWorker.Close()
     defer loginTokenWorker.Close()
-	zeebe.MustStartSignUpProcessInstance(zeebeClient, "userNewthing2", "password")
+	// zeebe.MustStartSignUpProcessInstance(zeebeClient, "userNewthing2", "password")
 	zeebe.MustStartLoginProcessInstance(zeebeClient, "userNW", "password")
 
 	// Initialize and start HTTP server
