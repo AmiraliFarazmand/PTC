@@ -29,16 +29,16 @@ func main() {
 	// Start workers
 	var validateJobWorker, createUserJobWorker worker.JobWorker
 
-	validateJobWorker = zeebe.ValidateCredentialsWorker(zeebeClient)
-	createUserJobWorker = zeebe.CreateUserWorker(zeebeClient, userRepo)
+	validateJobWorker = zeebe.ValidateCredentialsWorker(zeebeClient, userRepo)
+	createUserJobWorker = zeebe.CreateUserWorker(zeebeClient, userService)
 	defer validateJobWorker.Close()
 	defer createUserJobWorker.Close()
 	loginCheckWorker := zeebe.CheckLoginRequestWorker(zeebeClient, &userService)
     loginTokenWorker := zeebe.CreateLoginTokenWorker(zeebeClient)
     defer loginCheckWorker.Close()
     defer loginTokenWorker.Close()
-	// zeebe.MustStartSignUpProcessInstance(zeebeClient, "userNewthing2", "password")
-	zeebe.MustStartLoginProcessInstance(zeebeClient, "userNW", "password")
+	// zeebe.MustStartSignUpProcessInstance(zeebeClient, "newuser5", "password")
+	// zeebe.MustStartLoginProcessInstance(zeebeClient, "newuser5", "wwpassword")
 
 	// Initialize and start HTTP server
 	// server := http.InitializeHTTPServer(purchaseService, userService)

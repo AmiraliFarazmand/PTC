@@ -26,7 +26,6 @@ func MustStartSignUpProcessInstance(client zbc.Client, username,password string)
 		panic(err)
 	}
 
-	// log.Printf("###started process instance [%d] with {\"%s\": \"%s\"}", process.GetProcessInstanceKey(), "username", username)
 	return process
 }
 

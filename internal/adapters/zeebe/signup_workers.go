@@ -6,13 +6,13 @@ import (
 	"time"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/db"
-	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/core/app"
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/entities"
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/worker"
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/zbc"
 )
 
-func ValidateCredentialsWorker(client zbc.Client) worker.JobWorker{
+func ValidateCredentialsWorker(client zbc.Client,userRepo *db.MongoUserRepository) worker.JobWorker{
 	jobWorker := client.NewJobWorker().
 		JobType("validate-credentials").
 		Handler(func(jobClient worker.JobClient, job entities.Job) {
@@ -21,7 +21,12 @@ func ValidateCredentialsWorker(client zbc.Client) worker.JobWorker{
 			password := vars["password"].(string)
 			// log.Println("####On handler function", vars, username, password)
 			// Validate credentials (example logic)
-			isValid := len(username) > 3 && len(password) > 6
+			isUsernameUnique, err := userRepo.IsUsernameUnique(username)
+			isValid := true
+			isValid = len(username) > 3 && len(password) > 6
+			if err != nil || !isUsernameUnique {
+				isValid = false
+			}
 
 			// Complete the job with the result
 			varJob, err := jobClient.NewCompleteJobCommand().
@@ -41,11 +46,12 @@ func ValidateCredentialsWorker(client zbc.Client) worker.JobWorker{
 		PollInterval(1 * time.Second).
 		Name("validate-credential").
 		Open()
+		log.Println("###Validate credentials worker ended")
 	return jobWorker
 }
 
 
-func CreateUserWorker(client zbc.Client, userRepo *db.MongoUserRepository) worker.JobWorker {
+func CreateUserWorker(client zbc.Client, userService app.UserServiceImpl) worker.JobWorker {
     jobWorker := client.NewJobWorker().
         JobType("create-user").
         Handler(func(jobClient worker.JobClient, job entities.Job) {
@@ -53,7 +59,7 @@ func CreateUserWorker(client zbc.Client, userRepo *db.MongoUserRepository) worke
             username := vars["username"].(string)
             password := vars["password"].(string)
  
-            err := userRepo.Create(domain.User{Username: username, Password: password})
+            err := userService.Signup(username, password)
             if err != nil {
                 log.Printf("###failed to create user: %v", err)
                 return 
