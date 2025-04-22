@@ -1,9 +1,11 @@
 package zeebe
 
 import (
-    "log"
+	// "log"
 
-    "github.com/camunda-community-hub/zeebe-client-go/v8/pkg/zbc"
+	"log"
+
+	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/zbc"
 )
 
 func NewZeebeClient() zbc.Client {
@@ -12,13 +14,13 @@ func NewZeebeClient() zbc.Client {
         UsePlaintextConnection: true,
     })
     if err != nil {
-        log.Fatalf("###Failed to create Zeebe client: %v", err)
+        // log.Fatalf("###Failed to create Zeebe client: %v", err)
     }
     log.Printf("###Zeebe client created successfully %+v\n",client)
     return client
 }
 
 func MustCloseClient(client zbc.Client) {
-	log.Println("###closing client")
+	// log.Println("###closing client")
 	_ = client.Close()
 }

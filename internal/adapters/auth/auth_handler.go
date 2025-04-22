@@ -62,7 +62,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	userID := user.ID
-	tokenString, err := createToken(userID)
+	tokenString, err := CreateToken(userID)
 	if err != nil {
 		utils.RespondWithError(c, http.StatusInternalServerError, "Failed to create token")
 		return
@@ -76,7 +76,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "user_id": user.ID})
 }
 
-func createToken(userID string) (string, error) {
+func CreateToken(userID string) (string, error) {
 
 	// Create Token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
