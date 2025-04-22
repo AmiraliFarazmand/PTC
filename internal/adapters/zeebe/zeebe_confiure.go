@@ -16,7 +16,7 @@ func NewZeebeClient() zbc.Client {
     if err != nil {
         // log.Fatalf("###Failed to create Zeebe client: %v", err)
     }
-    log.Printf("###Zeebe client created successfully %+v\n",client)
+    log.Printf("###Zeebe client created successfully\n")
     return client
 }
 

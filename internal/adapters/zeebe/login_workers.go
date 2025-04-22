@@ -4,27 +4,27 @@ import (
 	"context"
 	"log"
 
-	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/auth"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/entities"
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/worker"
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/zbc"
 )
 
-func CheckLoginRequestWorker(client zbc.Client) worker.JobWorker {
+func CheckLoginRequestWorker(client zbc.Client, userService ports.UserService) worker.JobWorker {
 	jobWorker := client.NewJobWorker().
 		JobType("check-login-request").
 		Handler(func(jobClient worker.JobClient, job entities.Job) {
 			vars, _ := job.GetVariablesAsMap()
 			username := vars["username"].(string)
 			password := vars["password"].(string)
-
+		
 			// Check credentials (implement your own logic)
-			user :=auth.AuthHandler{}
-			_, err := user.UserService.Login(username, password)
+            user, err := userService.Login(username, password)
 			isValid := true
 			if err != nil {
 				isValid = false
 			}
+			log.Printf("###login worker: %+v %v %v", user, err.Error(),isValid)
 
 			varJob, err := jobClient.NewCompleteJobCommand().
 				JobKey(job.GetKey()).
