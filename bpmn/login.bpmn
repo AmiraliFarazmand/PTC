@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0sbemye" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.34.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.6.0">
+  <bpmn:process id="LoginProcess" name="login" isExecutable="true">
+    <bpmn:startEvent id="login_request_event" name="user sends login request">
+      <bpmn:outgoing>Flow_0e4mtwd</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="create-token-task" name="create token">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="create-login-token" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>success-authentication-flow</bpmn:incoming>
+      <bpmn:outgoing>created-token-flow</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="check-login-request-task" name="check username, password, and JSON body">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="check-login-request" />
+        <zeebe:ioMapping />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0e4mtwd</bpmn:incoming>
+      <bpmn:outgoing>Flow_1r64rs3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="gateway_is_authorized" name="was the username,password correct?">
+      <bpmn:incoming>Flow_1r64rs3</bpmn:incoming>
+      <bpmn:outgoing>success-authentication-flow</bpmn:outgoing>
+      <bpmn:outgoing>failed-authentication-flow</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="success-authentication-flow" name="yes" sourceRef="gateway_is_authorized" targetRef="create-token-task">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=loginValid = true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="created-token-flow" sourceRef="create-token-task" targetRef="send_success_user_login_revent" />
+    <bpmn:sequenceFlow id="failed-authentication-flow" name="No" sourceRef="gateway_is_authorized" targetRef="event_send_error_respond">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=loginValid = false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1r64rs3" sourceRef="check-login-request-task" targetRef="gateway_is_authorized" />
+    <bpmn:sequenceFlow id="Flow_0e4mtwd" sourceRef="login_request_event" targetRef="check-login-request-task" />
+    <bpmn:endEvent id="event_send_error_respond" name="send erorr respond">
+      <bpmn:extensionElements />
+      <bpmn:incoming>failed-authentication-flow</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="send_success_user_login_revent" name="send successful respond">
+      <bpmn:incoming>created-token-flow</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="LoginProcess">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="login_request_event">
+        <dc:Bounds x="182" y="222" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="160" y="265" width="81" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0iufuho_di" bpmnElement="create-token-task">
+        <dc:Bounds x="660" y="200" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_01lsu3r_di" bpmnElement="check-login-request-task">
+        <dc:Bounds x="300" y="200" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1l2q1lp_di" bpmnElement="gateway_is_authorized" isMarkerVisible="true">
+        <dc:Bounds x="525" y="215" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="510" y="272" width="90" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1t98kak_di" bpmnElement="event_send_error_respond">
+        <dc:Bounds x="852" y="82" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="847" y="125" width="51" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ozz12f_di" bpmnElement="send_success_user_login_revent">
+        <dc:Bounds x="852" y="222" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="833" y="265" width="79" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0ghm126_di" bpmnElement="success-authentication-flow">
+        <di:waypoint x="575" y="240" />
+        <di:waypoint x="660" y="240" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="609" y="222" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0qlbzyj_di" bpmnElement="created-token-flow">
+        <di:waypoint x="760" y="240" />
+        <di:waypoint x="852" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1n79oxg_di" bpmnElement="failed-authentication-flow">
+        <di:waypoint x="550" y="215" />
+        <di:waypoint x="550" y="100" />
+        <di:waypoint x="852" y="100" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="558" y="155" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1r64rs3_di" bpmnElement="Flow_1r64rs3">
+        <di:waypoint x="400" y="240" />
+        <di:waypoint x="525" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0e4mtwd_di" bpmnElement="Flow_0e4mtwd">
+        <di:waypoint x="218" y="240" />
+        <di:waypoint x="300" y="240" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

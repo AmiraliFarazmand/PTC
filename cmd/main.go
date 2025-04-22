@@ -39,5 +39,3 @@ func main() {
 	server.Start()
 	select {}
 }
-
-// search for naming conventional in go
