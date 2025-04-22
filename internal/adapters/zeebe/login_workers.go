@@ -24,7 +24,7 @@ func CheckLoginRequestWorker(client zbc.Client, userService ports.UserService) w
 			if err != nil {
 				isValid = false
 			}
-			log.Printf("###login worker: %+v %v %v", user, err.Error(),isValid)
+			log.Printf("###login worker: %+v %+v %v", user, err, isValid)
 
 			varJob, err := jobClient.NewCompleteJobCommand().
 				JobKey(job.GetKey()).
