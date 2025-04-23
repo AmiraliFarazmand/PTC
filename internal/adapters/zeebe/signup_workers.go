@@ -25,7 +25,7 @@ func ValidateCredentialsWorker(client zbc.Client,userRepo *db.MongoUserRepositor
 			isValid := true
 			isValid = len(username) > 3 && len(password) > 6
 			if err != nil || !isUsernameUnique {
-				isValid = false
+				isValid = false		//TODO: use app.IDK...
 			}
 
 			// Complete the job with the result

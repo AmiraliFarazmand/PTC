@@ -65,7 +65,7 @@ func CreateLoginTokenWorker(client zbc.Client) worker.JobWorker {
 		Open()
 	return jobWroker
 }
-
+//  TODO: remove this part
 // Dummy token generator
 func GenerateTokenForUser(username string) string {
 	return "token-for-" + username

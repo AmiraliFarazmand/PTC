@@ -157,7 +157,6 @@ func (h *AuthHandler) RequireAuth(c *gin.Context) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		// TODO: move this to an env file
 		secretKey, _ := utils.ReadEnv("SECRET_KEY")
 		return []byte(secretKey), nil
 	})

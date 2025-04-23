@@ -21,7 +21,7 @@ func MustStartSignUpProcessInstance(client zbc.Client, username,password string)
 	ctx, cancelFn := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancelFn()
 
-	process, err := command.Send(ctx)
+	process, err := command.Send(ctx) // TODO: work with result and extract http response with it
 	if err != nil {
 		panic(err)
 	}
