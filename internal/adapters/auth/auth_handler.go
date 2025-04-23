@@ -15,12 +15,14 @@ import (
 const tokenExpireTime int = 72
 
 type AuthHandler struct {
-	UserService ports.UserService
+	UserService    ports.UserService
+	ProcessManager ports.ZeebeProcessManager
 }
 
-func NewAuthHandler(userService ports.UserService) *AuthHandler {
+func NewAuthHandler(userService ports.UserService, processManager ports.ZeebeProcessManager) *AuthHandler {
 	return &AuthHandler{
-		UserService: userService,
+		UserService:    userService,
+		ProcessManager: processManager,
 	}
 }
 
@@ -35,13 +37,14 @@ func (h *AuthHandler) Signup(c *gin.Context) {
 		return
 	}
 
-	err := h.UserService.Signup(body.Username, body.Password)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// Start the Zeebe signup process
+	if err := h.ProcessManager.StartSignupProcess(body.Username, body.Password); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start signup process"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully"})
+	// The actual signup will be handled by the Zeebe worker
+	c.JSON(http.StatusAccepted, gin.H{"message": "Signup process started"})
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
@@ -52,6 +55,12 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	// Start the Zeebe login process
+	if err := h.ProcessManager.StartLoginProcess(body.Username, body.Password); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start login process"})
 		return
 	}
 
@@ -67,7 +76,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		utils.RespondWithError(c, http.StatusInternalServerError, "Failed to create token")
 		return
 	}
-	// Set the token in a cookie
+
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("Authorization", tokenString, 3600*tokenExpireTime, "", "", false, true)
 	c.JSON(http.StatusOK, gin.H{

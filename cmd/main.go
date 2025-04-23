@@ -2,11 +2,10 @@ package main
 
 import (
 	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/db"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/http"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/zeebe"
-	"github.com/AmiraliFarazmand/PTC_Task/internal/utils"
-	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/worker"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/core/app"
-	// "github.com/AmiraliFarazmand/PTC_Task/internal/adapters/http"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/utils"
 )
 
 func main() {
@@ -17,31 +16,34 @@ func main() {
 	// Create repositories
 	dbName, _ := utils.ReadEnv("DB_NAME")
 	userRepo := db.NewMongoUserRepository(client.Database(dbName).Collection("Users"))
-	// purchaseRepo := db.NewMongoPurchaseRepository(client.Database("ParsTasmimDB").Collection("Purchases"))
+	purchaseRepo := db.NewMongoPurchaseRepository(client.Database(dbName).Collection("Purchases"))
 
 	// Initialize services
-	userService:= app.InitializeUserService(userRepo)
-	// purchaseService := app.InitializePurchaseService(purchaseRepo)
+	userService := app.InitializeUserService(userRepo)
+	purchaseService := app.InitializePurchaseService(purchaseRepo)
+
+	// Initialize Zeebe client and process manager
 	zeebeClient := zeebe.NewZeebeClient()
 	defer zeebe.MustCloseClient(zeebeClient)
-	// Deploy BPMN processNewAuthHandler
-	zeebe.DeploySignupProcess(zeebeClient)
-	// Start workers
-	var validateJobWorker, createUserJobWorker worker.JobWorker
 
-	validateJobWorker = zeebe.ValidateCredentialsWorker(zeebeClient, userRepo)
-	createUserJobWorker = zeebe.CreateUserWorker(zeebeClient, userService)
+	// Deploy BPMN processes
+	zeebe.DeploySignupProcess(zeebeClient)
+
+	// Initialize process manager
+	processManager := zeebe.NewZeebeProcessManager(zeebeClient)
+
+	// Start Zeebe workers
+	validateJobWorker := zeebe.ValidateCredentialsWorker(zeebeClient, userRepo)
+	createUserJobWorker := zeebe.CreateUserWorker(zeebeClient, userService)
+	loginCheckWorker := zeebe.CheckLoginRequestWorker(zeebeClient, &userService)
+	loginTokenWorker := zeebe.CreateLoginTokenWorker(zeebeClient)
+
 	defer validateJobWorker.Close()
 	defer createUserJobWorker.Close()
-	loginCheckWorker := zeebe.CheckLoginRequestWorker(zeebeClient, &userService)
-    loginTokenWorker := zeebe.CreateLoginTokenWorker(zeebeClient)
-    defer loginCheckWorker.Close()
-    defer loginTokenWorker.Close()
-	// zeebe.MustStartSignUpProcessInstance(zeebeClient, "newuser5", "password")
-	// zeebe.MustStartLoginProcessInstance(zeebeClient, "newuser5", "wwpassword")
+	defer loginCheckWorker.Close()
+	defer loginTokenWorker.Close()
 
 	// Initialize and start HTTP server
-	// server := http.InitializeHTTPServer(purchaseService, userService)
-	// server.Start()
-	select {}
+	server := http.NewGinServer(purchaseService, userService, processManager)
+	server.Start()
 }
