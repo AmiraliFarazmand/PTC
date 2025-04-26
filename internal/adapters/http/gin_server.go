@@ -2,19 +2,18 @@ package http
 
 import (
 	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/auth"
-	"github.com/AmiraliFarazmand/PTC_Task/internal/core/app"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
 type GinServer struct {
-	PurchaseService app.PurchaseServiceImpl
-	UserService     app.UserServiceImpl
+	PurchaseService ports.PurchaseService
+	UserService     ports.UserService
 	ProcessManager  ports.ZeebeProcessManager
 }
 
-func NewGinServer(purchaseService app.PurchaseServiceImpl, userService app.UserServiceImpl, processManager ports.ZeebeProcessManager) *GinServer {
+func NewGinServer(purchaseService ports.PurchaseService, userService ports.UserService, processManager ports.ZeebeProcessManager) *GinServer {
 	return &GinServer{
 		PurchaseService: purchaseService,
 		UserService:     userService,
@@ -26,7 +25,7 @@ func (s *GinServer) Start() {
 	r := gin.Default()
 
 	// User routes
-	authHandler := auth.NewAuthHandler(&s.UserService, s.ProcessManager)
+	authHandler := auth.NewAuthHandler(s.UserService, s.ProcessManager)
 	//authentication routes
 	r.POST("/signup", authHandler.Signup)
 	r.POST("/login", authHandler.Login)

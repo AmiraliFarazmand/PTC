@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -14,11 +15,11 @@ type MongoPurchaseRepository struct {
 	Collection *mongo.Collection
 }
 
-func NewMongoPurchaseRepository(collection *mongo.Collection) *MongoPurchaseRepository {
+func NewMongoPurchaseRepository(collection *mongo.Collection) ports.PurchaseRepository {
 	return &MongoPurchaseRepository{Collection: collection}
 }
 
-func (r *MongoPurchaseRepository) Create(purchase domain.Purchase) error {
+func (r *MongoPurchaseRepository) Create(purchase *domain.Purchase) error {
 	purchaseID, err := bson.ObjectIDFromHex(purchase.ID)
 	if err != nil {
 		return err
@@ -36,18 +37,55 @@ func (r *MongoPurchaseRepository) Create(purchase domain.Purchase) error {
 	return err
 }
 
-func (r *MongoPurchaseRepository) FindByID(id string) (domain.Purchase, error) {
+func (r *MongoPurchaseRepository) GetByID(id string) (*domain.Purchase, error) {
 	var purchase domain.Purchase
 	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
-		return purchase, err
+		return nil, err
 	}
 	err = r.Collection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&purchase)
-	return purchase, err
+	if err != nil {
+		return nil, err
+	}
+	return &purchase, nil
 }
 
-func (r *MongoPurchaseRepository) UpdateStatus(id string, status string, paymentID string, userID string) error {
+func (r *MongoPurchaseRepository) Update(purchase *domain.Purchase) error {
+	objectID, err := bson.ObjectIDFromHex(purchase.ID)
+	if err != nil {
+		return err
+	}
+	_, err = r.Collection.ReplaceOne(
+		context.TODO(),
+		bson.M{"_id": objectID},
+		purchase,
+	)
+	return err
+}
+
+func (r *MongoPurchaseRepository) Delete(id string) error {
 	objectID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	_, err = r.Collection.DeleteOne(context.TODO(), bson.M{"_id": objectID})
+	return err
+}
+
+func (r *MongoPurchaseRepository) GetAll() ([]*domain.Purchase, error) {
+	cursor, err := r.Collection.Find(context.TODO(), bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.TODO())
+
+	var purchases []*domain.Purchase
+	err = cursor.All(context.TODO(), &purchases)
+	return purchases, err
+}
+
+func (r *MongoPurchaseRepository) UpdateStatus(purchaseID string, status string, paymentID string, userID string) error {
+	objectID, err := bson.ObjectIDFromHex(purchaseID)
 	if err != nil {
 		return err
 	}

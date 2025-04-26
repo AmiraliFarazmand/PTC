@@ -32,7 +32,7 @@ func main() {
 	// Start Zeebe workers
 	validateJobWorker := zeebe.ValidateCredentialsWorker(zeebeClient, userRepo)
 	createUserJobWorker := zeebe.CreateUserWorker(zeebeClient, userService)
-	loginCheckWorker := zeebe.CheckLoginRequestWorker(zeebeClient, &userService)
+	loginCheckWorker := zeebe.CheckLoginRequestWorker(zeebeClient, userService)
 	loginTokenWorker := zeebe.CreateLoginTokenWorker(zeebeClient)
 
 	defer validateJobWorker.Close()

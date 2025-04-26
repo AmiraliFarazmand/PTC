@@ -4,18 +4,20 @@ import (
 	"time"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/utils"
 )
 
 type PurchaseServiceImpl struct {
-	PurchaseRepo domain.PurchaseRepository
+	PurchaseRepo ports.PurchaseRepository
 }
 
-func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address string) (string, error) {
+var _ ports.PurchaseService = (*PurchaseServiceImpl)(nil) // Verify interface implementation
 
+func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address string) (string, error) {
 	purchaseID := utils.GenerateRandomID()
 
-	purchase := domain.Purchase{
+	purchase := &domain.Purchase{
 		ID:        purchaseID,
 		UserID:    userID,
 		Amount:    amount,
@@ -25,7 +27,11 @@ func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address 
 		Address:   address,
 	}
 
-	return purchaseID, s.PurchaseRepo.Create(purchase)
+	if err := s.PurchaseRepo.Create(purchase); err != nil {
+		return "", err
+	}
+
+	return purchaseID, nil
 }
 
 func (s *PurchaseServiceImpl) ConfirmPayment(purchaseID string, userID string) error {

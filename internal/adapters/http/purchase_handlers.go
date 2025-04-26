@@ -3,7 +3,7 @@ package http
 import (
 	"net/http"
 
-	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,13 +21,13 @@ func (s *GinServer) confirmPayment(c *gin.Context) {
 		return
 	}
 
-	userObj, ok := user.(domain.User)
+	userDTO, ok := user.(ports.UserDTO)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cast user"})
 		return
 	}
 
-	err := s.PurchaseService.ConfirmPayment(body.PurchaseID, userObj.ID)
+	err := s.PurchaseService.ConfirmPayment(body.PurchaseID, userDTO.ID)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -41,13 +41,12 @@ func (s *GinServer) processPurchase(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
-	userObj, ok := user.(domain.User)
+	userDTO, ok := user.(ports.UserDTO)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cast user"})
 		return
 	}
 	var body struct {
-		// UserID  string `json:"user_id" binding:"required"`
 		Amount  int    `json:"amount" binding:"required"`
 		Address string `json:"address" binding:"required"`
 	}
@@ -55,7 +54,7 @@ func (s *GinServer) processPurchase(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "Invalid request body"})
 		return
 	}
-	purchaseID, err := s.PurchaseService.CreatePurchase(userObj.ID, body.Amount, body.Address)
+	purchaseID, err := s.PurchaseService.CreatePurchase(userDTO.ID, body.Amount, body.Address)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return

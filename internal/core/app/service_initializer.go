@@ -1,11 +1,17 @@
 package app
 
-import "github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
+import (
+	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
+)
 
-func InitializePurchaseService(purchaseRepo domain.PurchaseRepository) PurchaseServiceImpl {
-	return PurchaseServiceImpl{PurchaseRepo: purchaseRepo}
+func InitializeUserService(userRepo ports.UserRepository) ports.UserService {
+	return &UserServiceImpl{
+		UserRepo: userRepo,
+	}
 }
 
-func InitializeUserService(userRepo domain.UserRepository) UserServiceImpl {
-	return UserServiceImpl{UserRepo: userRepo}
+func InitializePurchaseService(purchaseRepo ports.PurchaseRepository) ports.PurchaseService {
+	return &PurchaseServiceImpl{
+		PurchaseRepo: purchaseRepo,
+	}
 }

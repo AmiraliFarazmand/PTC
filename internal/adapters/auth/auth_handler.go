@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/utils"
 	"github.com/gin-gonic/gin"
@@ -37,14 +36,17 @@ func (h *AuthHandler) Signup(c *gin.Context) {
 		return
 	}
 
-	// Start the Zeebe signup process
 	if err := h.ProcessManager.StartSignupProcess(body.Username, body.Password); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start signup process"})
 		return
 	}
 
-	// The actual signup will be handled by the Zeebe worker
-	c.JSON(http.StatusAccepted, gin.H{"message": "Signup process started"})
+	if err := h.UserService.Signup(body.Username, body.Password); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
@@ -58,7 +60,6 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Start the Zeebe login process
 	if err := h.ProcessManager.StartLoginProcess(body.Username, body.Password); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start login process"})
 		return
@@ -70,8 +71,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	userID := user.ID
-	tokenString, err := CreateToken(userID)
+	tokenString, err := CreateToken(user.ID)
 	if err != nil {
 		utils.RespondWithError(c, http.StatusInternalServerError, "Failed to create token")
 		return
@@ -81,104 +81,77 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.SetCookie("Authorization", tokenString, 3600*tokenExpireTime, "", "", false, true)
 	c.JSON(http.StatusOK, gin.H{
 		"token": tokenString,
+		"user":  user,
 	})
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "user_id": user.ID})
 }
 
 func CreateToken(userID string) (string, error) {
-
-	// Create Token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": userID,
 		"exp": time.Now().Add(time.Hour * time.Duration(tokenExpireTime)).Unix(),
 	})
 	secretKey, _ := utils.ReadEnv("SECRET_KEY")
-	tokenString, err := token.SignedString([]byte(secretKey))
-	if err != nil {
-		return "", err
-	}
-	return tokenString, nil
+	return token.SignedString([]byte(secretKey))
 }
 
 func (h *AuthHandler) ValidateHnadler(c *gin.Context) {
-	// Get the user from the context (set by RequireAuth middleware)
 	user, exists := c.Get("user")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
 
-	// Cast the user to the correct type
-	userObj, ok := user.(domain.User)
+	userDTO, ok := user.(ports.UserDTO)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cast user"})
 		return
 	}
 
-	// Respond with the user information
 	c.JSON(http.StatusOK, gin.H{
 		"message":  "User is authenticated",
-		"user_id":  userObj.ID,
-		"username": userObj.Username,
+		"user_id":  userDTO.ID,
+		"username": userDTO.Username,
 	})
 }
 
-func validateClaims(claims jwt.MapClaims, userService ports.UserService) (domain.User, bool) {
-	// Check if the token is expired
-	if float64(time.Now().Unix()) > claims["exp"].(float64) {
-		return domain.User{}, false
-	}
-
-	// Parse the user ID from the claims
-	userID, ok := claims["sub"].(string)
-	if !ok {
-		return domain.User{}, false
-	}
-	// Use the UserService to find the user
-	user, err := userService.FindUserByID(userID)
-	if err != nil {
-		return domain.User{}, false
-	}
-
-	return user, true
-}
-
 func (h *AuthHandler) RequireAuth(c *gin.Context) {
-	// Get the cookie off the request
 	tokenString, err := c.Cookie("Authorization")
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "No authorization token"})
 		return
 	}
 
-	// Parse the token
+	secretKey, _ := utils.ReadEnv("SECRET_KEY")
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-
-		secretKey, _ := utils.ReadEnv("SECRET_KEY")
 		return []byte(secretKey), nil
 	})
+
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 		return
 	}
 
-	claims, claimsOk := token.Claims.(jwt.MapClaims)
-	if !claimsOk {
-		c.AbortWithError(http.StatusUnauthorized, err)
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
 		return
 	}
 
-	// Validate claims and find the user
-	user, ok := validateClaims(claims, h.UserService)
+	userID, ok := claims["sub"].(string)
 	if !ok {
-		c.AbortWithError(http.StatusUnauthorized, err)
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID in token"})
 		return
 	}
 
-	// Set the user to the context
+	user, err := h.UserService.FindUserByID(userID)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+
 	c.Set("user", user)
 	c.Next()
 }

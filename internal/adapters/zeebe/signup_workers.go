@@ -6,14 +6,13 @@ import (
 	"log"
 	"time"
 
-	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/db"
-	"github.com/AmiraliFarazmand/PTC_Task/internal/core/app"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/entities"
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/worker"
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/zbc"
 )
 
-func ValidateCredentialsWorker(client zbc.Client, userRepo *db.MongoUserRepository) worker.JobWorker {
+func ValidateCredentialsWorker(client zbc.Client, userRepo ports.UserRepository) worker.JobWorker {
 	jobWorker := client.NewJobWorker().
 		JobType("validate-credentials").
 		Handler(func(jobClient worker.JobClient, job entities.Job) {
@@ -60,7 +59,7 @@ func ValidateCredentialsWorker(client zbc.Client, userRepo *db.MongoUserReposito
 	return jobWorker
 }
 
-func CreateUserWorker(client zbc.Client, userService app.UserServiceImpl) worker.JobWorker {
+func CreateUserWorker(client zbc.Client, userService ports.UserService) worker.JobWorker {
 	return client.NewJobWorker().
 		JobType("create-user").
 		Handler(func(jobClient worker.JobClient, job entities.Job) {
@@ -88,10 +87,10 @@ func CreateUserWorker(client zbc.Client, userService app.UserServiceImpl) worker
 			tempCommand, err := jobClient.NewCompleteJobCommand().
 				JobKey(job.GetKey()).
 				VariablesFromString(string(varsJSON))
-				if err != nil {
-					log.Printf("Failed to create command: %v", err)
-				}
-				tempCommand.Send(context.Background())
+			if err != nil {
+				log.Printf("Failed to create command: %v", err)
+			}
+			tempCommand.Send(context.Background())
 
 			if err != nil {
 				log.Printf("Failed to complete job: %v", err)
