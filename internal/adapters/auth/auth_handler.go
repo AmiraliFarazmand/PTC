@@ -43,7 +43,6 @@ func (h *AuthHandler) Signup(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
 }
-
 func (h *AuthHandler) Login(c *gin.Context) {
 	var body struct {
 		Username string `json:"username"`
@@ -55,28 +54,25 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	if err := h.ProcessManager.StartLoginProcess(body.Username, body.Password); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start login process"})
-		return
-	}
-
-	user, err := h.UserService.Login(body.Username, body.Password)
+	// Start login process and wait for result
+	result, err := h.ProcessManager.StartLoginProcess(body.Username, body.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
-	tokenString, err := CreateToken(user.ID)
-	if err != nil {
-		utils.RespondWithError(c, http.StatusInternalServerError, "Failed to create token")
+	if !result.LoginValid {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
 
+	// Set cookie with the token from Zeebe process
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Authorization", tokenString, 3600*tokenExpireTime, "", "", false, true)
+	c.SetCookie("Authorization", result.Token, 3600*tokenExpireTime, "", "", false, true)
+
 	c.JSON(http.StatusOK, gin.H{
-		"token": tokenString,
-		"user":  user,
+		"token":    result.Token,
+		"username": result.Username,
 	})
 }
 

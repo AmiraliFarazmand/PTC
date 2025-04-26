@@ -6,25 +6,16 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/pb"
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/zbc"
 )
 
-type ProcessVariables struct {
-	Username   string `json:"username"`
-	Password   string `json:"password"`
-	IsValid    bool   `json:"isValid"`
-	LoginValid bool   `json:"loginValid"` 
-	Token      string `json:"token"`
-	Error      string `json:"error"`
-}
-
-
-func StartSignUpProcessInstanceWithResult(client zbc.Client, username, password string) (*ProcessVariables, error) {
-	variables := ProcessVariables{
+func StartSignUpProcessInstanceWithResult(client zbc.Client, username, password string) (*domain.ProcessVariables, error) {
+	variables := domain.ProcessVariables{
 		Username: username,
 		Password: password,
-		IsValid: true,
+		IsValid:  true,
 	}
 
 	ctx, cancelFn := context.WithTimeout(context.Background(), 10*time.Second)
@@ -49,7 +40,7 @@ func StartSignUpProcessInstanceWithResult(client zbc.Client, username, password 
 	}
 
 	// Parse result variables
-	var resultVars ProcessVariables
+	var resultVars domain.ProcessVariables
 	if err := json.Unmarshal([]byte(result.GetVariables()), &resultVars); err != nil {
 		return nil, fmt.Errorf("failed to parse result variables: %w", err)
 	}
@@ -57,8 +48,8 @@ func StartSignUpProcessInstanceWithResult(client zbc.Client, username, password 
 	return &resultVars, nil
 }
 
-func StartLoginProcessInstanceWithResult(client zbc.Client, username, password string) (*ProcessVariables, error) {
-	variables := ProcessVariables{
+func StartLoginProcessInstanceWithResult(client zbc.Client, username, password string) (*domain.ProcessVariables, error) {
+	variables := domain.ProcessVariables{
 		Username: username,
 		Password: password,
 	}
@@ -83,7 +74,7 @@ func StartLoginProcessInstanceWithResult(client zbc.Client, username, password s
 		return nil, fmt.Errorf("failed to create and complete login instance: %w", err)
 	}
 
-	var resultVars ProcessVariables
+	var resultVars domain.ProcessVariables
 	if err := json.Unmarshal([]byte(result.GetVariables()), &resultVars); err != nil {
 		return nil, fmt.Errorf("failed to parse login result variables: %w", err)
 	}
@@ -93,7 +84,7 @@ func StartLoginProcessInstanceWithResult(client zbc.Client, username, password s
 
 // Kept for backward compatibility
 func MustStartLoginProcessInstance(client zbc.Client, username, password string) *pb.CreateProcessInstanceResponse {
-	variables := ProcessVariables{
+	variables := domain.ProcessVariables{
 		Username: username,
 		Password: password,
 	}

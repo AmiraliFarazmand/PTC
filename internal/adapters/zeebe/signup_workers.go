@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/entities"
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/worker"
@@ -17,7 +18,7 @@ func ValidateCredentialsWorker(client zbc.Client, userRepo ports.UserRepository)
 		JobType("validate-credentials").
 		Handler(func(jobClient worker.JobClient, job entities.Job) {
 			// Parse incoming variables
-			var vars ProcessVariables
+			var vars domain.ProcessVariables
 			if err := json.Unmarshal([]byte(job.GetVariables()), &vars); err != nil {
 				log.Printf("Failed to parse variables: %v", err)
 				return
@@ -67,7 +68,7 @@ func CreateUserWorker(client zbc.Client, userService ports.UserService) worker.J
 	return client.NewJobWorker().
 		JobType("create-user").
 		Handler(func(jobClient worker.JobClient, job entities.Job) {
-			var vars ProcessVariables
+			var vars domain.ProcessVariables
 			if err := json.Unmarshal([]byte(job.GetVariables()), &vars); err != nil {
 				log.Printf("Failed to parse variables: %v", err)
 				return
