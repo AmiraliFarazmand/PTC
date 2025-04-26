@@ -2,6 +2,7 @@ package zeebe
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"time"
 
@@ -12,32 +13,42 @@ import (
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/zbc"
 )
 
-func ValidateCredentialsWorker(client zbc.Client,userRepo *db.MongoUserRepository) worker.JobWorker{
+func ValidateCredentialsWorker(client zbc.Client, userRepo *db.MongoUserRepository) worker.JobWorker {
 	jobWorker := client.NewJobWorker().
 		JobType("validate-credentials").
 		Handler(func(jobClient worker.JobClient, job entities.Job) {
-			vars, _ := job.GetVariablesAsMap()
-			username := vars["username"].(string)
-			password := vars["password"].(string)
-			// log.Println("####On handler function", vars, username, password)
-			// Validate credentials (example logic)
-			isUsernameUnique, err := userRepo.IsUsernameUnique(username)
-			isValid := true
-			isValid = len(username) > 3 && len(password) > 6
-			if err != nil || !isUsernameUnique {
-				isValid = false		//TODO: use app.IDK...
+			// Parse incoming variables
+			var vars ProcessVariables
+			if err := json.Unmarshal([]byte(job.GetVariables()), &vars); err != nil {
+				log.Printf("Failed to parse variables: %v", err)
+				return
 			}
 
-			// Complete the job with the result
-			varJob, err := jobClient.NewCompleteJobCommand().
-				JobKey(job.GetKey()).
-				VariablesFromMap(map[string]interface{}{"isValid": isValid})
-			if err != nil {
-				log.Printf("###Failed to compelte job: %v", err.Error())
+			// Validate credentials
+			isUsernameUnique, err := userRepo.IsUsernameUnique(vars.Username)
+			vars.IsValid = len(vars.Username) > 3 && len(vars.Password) > 6
+			if err != nil || !isUsernameUnique {
+				vars.IsValid = false
+				vars.Error = "Username already taken or validation failed"
 			}
-			_, err =varJob.Send(context.Background())
+
+			// Complete the job with updated variables
+			varsJSON, err := json.Marshal(vars)
 			if err != nil {
-				log.Printf("###Failed to complete job: %v", err)
+				log.Printf("Failed to marshal variables: %v", err)
+				return
+			}
+
+			tempCommand, err := jobClient.NewCompleteJobCommand().
+				JobKey(job.GetKey()).
+				VariablesFromString(string(varsJSON))
+			if err != nil {
+				log.Printf("Failed to create command: %v", err)
+			}
+			tempCommand.Send(context.Background())
+
+			if err != nil {
+				log.Printf("Failed to complete job: %v", err)
 			}
 		}).
 		Concurrency(1).
@@ -46,33 +57,45 @@ func ValidateCredentialsWorker(client zbc.Client,userRepo *db.MongoUserRepositor
 		PollInterval(1 * time.Second).
 		Name("validate-credential").
 		Open()
-		log.Println("###Validate credentials worker ended")
 	return jobWorker
 }
 
-
 func CreateUserWorker(client zbc.Client, userService app.UserServiceImpl) worker.JobWorker {
-    jobWorker := client.NewJobWorker().
-        JobType("create-user").
-        Handler(func(jobClient worker.JobClient, job entities.Job) {
-            vars,_ := job.GetVariablesAsMap()
-            username := vars["username"].(string)
-            password := vars["password"].(string)
- 
-            err := userService.Signup(username, password)
-            if err != nil {
-                log.Printf("###failed to create user: %v", err)
-                return 
-            }
+	return client.NewJobWorker().
+		JobType("create-user").
+		Handler(func(jobClient worker.JobClient, job entities.Job) {
+			var vars ProcessVariables
+			if err := json.Unmarshal([]byte(job.GetVariables()), &vars); err != nil {
+				log.Printf("Failed to parse variables: %v", err)
+				return
+			}
 
-            // Complete the job
-            _, err = jobClient.NewCompleteJobCommand().
-                JobKey(job.GetKey()).
-                Send(context.Background())
-            if err != nil {
-                log.Printf("###Failed to complete job: %v", err)
-            }
-        }).
-        Open()
-    return jobWorker 
+			err := userService.Signup(vars.Username, vars.Password)
+			if err != nil {
+				vars.Error = err.Error()
+				vars.IsValid = false
+				log.Printf("Failed to create user: %v", err)
+			} else {
+				vars.IsValid = true
+			}
+
+			varsJSON, err := json.Marshal(vars)
+			if err != nil {
+				log.Printf("Failed to marshal variables: %v", err)
+				return
+			}
+
+			tempCommand, err := jobClient.NewCompleteJobCommand().
+				JobKey(job.GetKey()).
+				VariablesFromString(string(varsJSON))
+				if err != nil {
+					log.Printf("Failed to create command: %v", err)
+				}
+				tempCommand.Send(context.Background())
+
+			if err != nil {
+				log.Printf("Failed to complete job: %v", err)
+			}
+		}).
+		Open()
 }

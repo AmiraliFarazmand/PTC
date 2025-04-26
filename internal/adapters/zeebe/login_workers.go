@@ -2,6 +2,7 @@ package zeebe
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
@@ -14,27 +15,39 @@ func CheckLoginRequestWorker(client zbc.Client, userService ports.UserService) w
 	jobWorker := client.NewJobWorker().
 		JobType("check-login-request").
 		Handler(func(jobClient worker.JobClient, job entities.Job) {
-			vars, _ := job.GetVariablesAsMap()
-			username := vars["username"].(string)
-			password := vars["password"].(string)
-		
-			// Check credentials (implement your own logic)
-            user, err := userService.Login(username, password)
-			isValid := true
-			if err != nil {
-				isValid = false
+			var vars ProcessVariables
+			if err := json.Unmarshal([]byte(job.GetVariables()), &vars); err != nil {
+				log.Printf("Failed to parse variables: %v", err)
+				return
 			}
-			log.Printf("###login worker: %+v %+v %v", user, err, isValid)
 
-			varJob, err := jobClient.NewCompleteJobCommand().
-				JobKey(job.GetKey()).
-				VariablesFromMap(map[string]interface{}{"loginValid": isValid})
+			// Check credentials
+			user, err := userService.Login(vars.Username, vars.Password)
 			if err != nil {
-				log.Printf("###Failed to compelte job on login worker: %v", err.Error())
+				vars.LoginValid = false
+				vars.Error = err.Error()
+			} else {
+				vars.LoginValid = true
+				vars.Username = user.Username // In case username casing was normalized
 			}
-			_, err = varJob.Send(context.Background())
+
+			varsJSON, err := json.Marshal(vars)
 			if err != nil {
-				log.Printf("###Failed to complete check-login-request job: %v", err)
+				log.Printf("Failed to marshal variables: %v", err)
+				return
+			}
+			log.Printf("###LOGIN VARIABLES: \n%+v\n%+v", varsJSON,vars)
+
+			tempCommand, err := jobClient.NewCompleteJobCommand().
+				JobKey(job.GetKey()).
+				VariablesFromString(string(varsJSON))
+				if err != nil {
+					log.Printf("Failed to create command: %v", err)
+				}
+				tempCommand.Send(context.Background())
+
+			if err != nil {
+				log.Printf("Failed to complete job: %v", err)
 			}
 		}).
 		Open()
@@ -42,31 +55,41 @@ func CheckLoginRequestWorker(client zbc.Client, userService ports.UserService) w
 }
 
 func CreateLoginTokenWorker(client zbc.Client) worker.JobWorker {
-	jobWroker := client.NewJobWorker().
+	return client.NewJobWorker().
 		JobType("create-login-token").
 		Handler(func(jobClient worker.JobClient, job entities.Job) {
-			vars, _ := job.GetVariablesAsMap()
-			username := vars["username"].(string)
-
-			// Generate token (implement your own logic)
-			token := GenerateTokenForUser(username)
-
-			varJob, err := jobClient.NewCompleteJobCommand().
-				JobKey(job.GetKey()).
-				VariablesFromMap(map[string]interface{}{"token": token})
-			if err != nil {
-				log.Printf("###Failed to compelte job on login worker: %v", err.Error())
+			var vars ProcessVariables
+			if err := json.Unmarshal([]byte(job.GetVariables()), &vars); err != nil {
+				log.Printf("Failed to parse variables: %v", err)
+				return
 			}
-			_, err = varJob.Send(context.Background())
+
+			// Generate token
+			vars.Token = GenerateTokenForUser(vars.Username)
+
+			varsJSON, err := json.Marshal(vars)
 			if err != nil {
-				log.Printf("###Failed to complete check-login-request job: %v", err)
+				log.Printf("Failed to marshal variables: %v", err)
+				return
+			}
+
+			tempCommand, err := jobClient.NewCompleteJobCommand().
+				JobKey(job.GetKey()).
+				VariablesFromString(string(varsJSON))
+				if err != nil {
+					log.Printf("Failed to create command: %v", err)
+				}
+
+				tempCommand.Send(context.Background())
+
+			if err != nil {
+				log.Printf("Failed to complete job: %v", err)
 			}
 		}).
 		Open()
-	return jobWroker
 }
-//  TODO: remove this part
-// Dummy token generator
+
+// TODO: remove this part and implement proper token generation
 func GenerateTokenForUser(username string) string {
 	return "token-for-" + username
 }
