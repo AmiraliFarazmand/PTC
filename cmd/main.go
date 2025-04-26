@@ -26,9 +26,6 @@ func main() {
 	zeebeClient := zeebe.NewZeebeClient()
 	defer zeebe.MustCloseClient(zeebeClient)
 
-	// Deploy BPMN processes
-	zeebe.DeploySignupProcess(zeebeClient)
-
 	// Initialize process manager
 	processManager := zeebe.NewZeebeProcessManager(zeebeClient)
 
