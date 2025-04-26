@@ -24,11 +24,15 @@ func ValidateCredentialsWorker(client zbc.Client, userRepo ports.UserRepository)
 			}
 
 			// Validate credentials
-			isUsernameUnique, err := userRepo.IsUsernameUnique(vars.Username)
-			vars.IsValid = len(vars.Username) > 3 && len(vars.Password) > 6
+			isUsernameUnique, err := userRepo.IsUsernameUnique(vars.Username)	
 			if err != nil || !isUsernameUnique {
 				vars.IsValid = false
-				vars.Error = "Username already taken or validation failed"
+				vars.Error = "username already exists"
+				log.Printf("Username already exists: %v %v", err, isUsernameUnique)
+			}
+			if !(len(vars.Username) > 3 && len(vars.Password) > 6) {
+				vars.IsValid = false
+				vars.Error = "invalid username or password"	
 			}
 
 			// Complete the job with updated variables

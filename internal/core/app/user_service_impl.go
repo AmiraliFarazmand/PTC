@@ -13,15 +13,6 @@ type UserServiceImpl struct {
 }
 
 func (s *UserServiceImpl) Signup(username, password string) error {
-	// Check if username already exists
-	exists, err := s.UserRepo.IsUsernameUnique(username)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		return errors.New("username already exists")
-	}
-
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
