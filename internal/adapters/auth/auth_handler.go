@@ -37,11 +37,6 @@ func (h *AuthHandler) Signup(c *gin.Context) {
 	}
 
 	if err := h.ProcessManager.StartSignupProcess(body.Username, body.Password); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start signup process"})
-		return
-	}
-
-	if err := h.UserService.Signup(body.Username, body.Password); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

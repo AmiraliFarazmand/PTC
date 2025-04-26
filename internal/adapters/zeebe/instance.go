@@ -91,32 +91,6 @@ func StartLoginProcessInstanceWithResult(client zbc.Client, username, password s
 }
 
 // Kept for backward compatibility
-func MustStartSignUpProcessInstance(client zbc.Client, username, password string) *pb.CreateProcessInstanceResponse {
-	variables := ProcessVariables{
-		Username: username,
-		Password: password,
-	}
-
-	command, err := client.NewCreateInstanceCommand().
-		BPMNProcessId("SignupProcess").
-		LatestVersion().
-		VariablesFromObject(variables)
-	if err != nil {
-		panic(fmt.Errorf("failed to create instance %+v, %+v", err, command))
-	}
-
-	ctx, cancelFn := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancelFn()
-
-	process, err := command.Send(ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	return process
-}
-
-// Kept for backward compatibility
 func MustStartLoginProcessInstance(client zbc.Client, username, password string) *pb.CreateProcessInstanceResponse {
 	variables := ProcessVariables{
 		Username: username,

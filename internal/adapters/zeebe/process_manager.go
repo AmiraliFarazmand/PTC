@@ -1,6 +1,8 @@
 package zeebe
 
 import (
+	"fmt"
+
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/zbc"
 )
 
@@ -22,7 +24,17 @@ func (z *ZeebeProcessManagerImpl) StartSignupProcess(username, password string) 
 		}
 	}()
 
-	MustStartSignUpProcessInstance(z.client, username, password)
+	
+    result, err := StartSignUpProcessInstanceWithResult(z.client, username, password)
+    if err != nil {
+        return err
+    }
+
+    // Check for process-level errors
+    if result.Error != "" {
+        return fmt.Errorf(result.Error)
+    }
+
 	return nil
 }
 
