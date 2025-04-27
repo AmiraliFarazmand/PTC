@@ -52,6 +52,7 @@ func StartLoginProcessInstanceWithResult(client zbc.Client, username, password s
 	variables := domain.ProcessVariables{
 		Username: username,
 		Password: password,
+		IsValid: true,
 	}
 
 	ctx, cancelFn := context.WithTimeout(context.Background(), 10*time.Second)

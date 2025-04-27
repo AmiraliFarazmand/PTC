@@ -19,36 +19,7 @@ func CheckLoginRequestWorker(client zbc.Client, userService ports.UserService) w
 	jobWorker := client.NewJobWorker().
 		JobType("check-login-request").
 		Handler(func(jobClient worker.JobClient, job entities.Job) {
-			var vars domain.ProcessVariables
-			if err := json.Unmarshal([]byte(job.GetVariables()), &vars); err != nil {
-				log.Printf("Failed to parse variables: %v", err)
-				return
-			}
-
-			// Check credentials
-			user, err := userService.Login(vars.Username, vars.Password)
-			if err != nil {
-				vars.LoginValid = false
-				vars.Error = err.Error()
-			} else {
-				vars.LoginValid = true
-				vars.Username = user.Username // In case username casing was normalized
-			}
-
-			varsJSON, err := json.Marshal(vars)
-			if err != nil {
-				log.Printf("Failed to marshal variables: %v", err)
-				return
-			}
-			log.Printf("###LOGIN VARIABLES: \n%+v\n%+v", varsJSON, vars)
-
-			tempCommand, err := jobClient.NewCompleteJobCommand().
-				JobKey(job.GetKey()).
-				VariablesFromString(string(varsJSON))
-			if err != nil {
-				log.Printf("Failed to create command: %v", err)
-			}
-			tempCommand.Send(context.Background())
+			checkLoginHandler(jobClient, job, userService)
 		}).
 		Open()
 	return jobWorker
@@ -58,40 +29,77 @@ func CreateLoginTokenWorker(client zbc.Client) worker.JobWorker {
 	return client.NewJobWorker().
 		JobType("create-login-token").
 		Handler(func(jobClient worker.JobClient, job entities.Job) {
-			var vars domain.ProcessVariables
-			if err := json.Unmarshal([]byte(job.GetVariables()), &vars); err != nil {
-				log.Printf("Failed to parse variables: %v", err)
-				return
-			}
-
-			// Generate JWT token	TODO: move it to utils
-			token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-				"sub": vars.Username,
-				"exp": time.Now().Add(time.Hour * time.Duration(72)).Unix(),
-			})
-
-			secretKey, _ := utils.ReadEnv("SECRET_KEY")
-			tokenString, err := token.SignedString([]byte(secretKey))
-			if err != nil {
-				vars.Error = "Failed to generate token"
-				vars.LoginValid = false
-			} else {
-				vars.Token = tokenString
-			}
-
-			varsJSON, err := json.Marshal(vars)
-			if err != nil {
-				log.Printf("Failed to marshal variables: %v", err)
-				return
-			}
-
-			tempCommand, err := jobClient.NewCompleteJobCommand().
-				JobKey(job.GetKey()).
-				VariablesFromString(string(varsJSON))
-			if err != nil {
-				log.Printf("Failed to create command: %v", err)
-			}
-			tempCommand.Send(context.Background())
+			createTokenHandler(jobClient, job)
 		}).
 		Open()
+}
+
+func checkLoginHandler(jobClient worker.JobClient, job entities.Job, userService ports.UserService) {
+	var vars domain.ProcessVariables
+	if err := json.Unmarshal([]byte(job.GetVariables()), &vars); err != nil {
+		log.Printf("Failed to parse variables: %v", err)
+		return
+	}
+
+	// Check credentials
+	user, err := userService.Login(vars.Username, vars.Password)
+	if err != nil {
+		vars.LoginValid = false
+		vars.Error = err.Error()
+	} else {
+		vars.LoginValid = true
+		vars.Username = user.Username // In case username casing was normalized
+	}
+
+	varsJSON, err := json.Marshal(vars)
+	if err != nil {
+		log.Printf("Failed to marshal variables: %v", err)
+		return
+	}
+
+	tempCommand, err := jobClient.NewCompleteJobCommand().
+		JobKey(job.GetKey()).
+		VariablesFromString(string(varsJSON))
+	if err != nil {
+		log.Printf("Failed to create command: %v", err)
+	}
+	tempCommand.Send(context.Background())
+}
+
+func createTokenHandler(jobClient worker.JobClient, job entities.Job) {
+	var vars domain.ProcessVariables
+	if err := json.Unmarshal([]byte(job.GetVariables()), &vars); err != nil {
+		log.Printf("Failed to parse variables: %v", err)
+		return
+	}
+
+	// Generate JWT token	TODO: move it to utils
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": vars.Username,
+		"exp": time.Now().Add(time.Hour * time.Duration(72)).Unix(),
+	})
+
+	secretKey, _ := utils.ReadEnv("SECRET_KEY")
+	tokenString, err := token.SignedString([]byte(secretKey))
+	if err != nil {
+		vars.Error = "Failed to generate token"
+		vars.LoginValid = false
+		vars.IsValid = false
+	} else {
+		vars.Token = tokenString
+	}
+
+	varsJSON, err := json.Marshal(vars)
+	if err != nil {
+		log.Printf("Failed to marshal variables: %v", err)
+		return
+	}
+
+	tempCommand, err := jobClient.NewCompleteJobCommand().
+		JobKey(job.GetKey()).
+		VariablesFromString(string(varsJSON))
+	if err != nil {
+		log.Printf("Failed to create command: %v", err)
+	}
+	tempCommand.Send(context.Background())
 }

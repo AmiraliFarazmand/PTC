@@ -3,7 +3,6 @@ package auth
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/utils"
@@ -76,14 +75,6 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	})
 }
 
-func CreateToken(userID string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": userID,
-		"exp": time.Now().Add(time.Hour * time.Duration(tokenExpireTime)).Unix(),
-	})
-	secretKey, _ := utils.ReadEnv("SECRET_KEY")
-	return token.SignedString([]byte(secretKey))
-}
 
 func (h *AuthHandler) ValidateHnadler(c *gin.Context) {
 	user, exists := c.Get("user")
