@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
-	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/pb"
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/zbc"
 )
 
@@ -50,9 +49,9 @@ func StartSignUpProcessInstanceWithResult(client zbc.Client, username, password 
 
 func StartLoginProcessInstanceWithResult(client zbc.Client, username, password string) (*domain.ProcessVariables, error) {
 	variables := domain.ProcessVariables{
-		Username: username,
-		Password: password,
-		IsValid: true,
+		Username:   username,
+		Password:   password,
+		LoginValid: true,
 	}
 
 	ctx, cancelFn := context.WithTimeout(context.Background(), 10*time.Second)
@@ -68,7 +67,7 @@ func StartLoginProcessInstanceWithResult(client zbc.Client, username, password s
 
 	result, err := command.
 		WithResult().
-		FetchVariables("username", "loginValid", "token").
+		FetchVariables("username", "loginValid", "token", "error").
 		Send(ctx)
 
 	if err != nil {
@@ -81,30 +80,4 @@ func StartLoginProcessInstanceWithResult(client zbc.Client, username, password s
 	}
 
 	return &resultVars, nil
-}
-
-// Kept for backward compatibility
-func MustStartLoginProcessInstance(client zbc.Client, username, password string) *pb.CreateProcessInstanceResponse {
-	variables := domain.ProcessVariables{
-		Username: username,
-		Password: password,
-	}
-
-	command, err := client.NewCreateInstanceCommand().
-		BPMNProcessId("LoginProcess").
-		LatestVersion().
-		VariablesFromObject(variables)
-	if err != nil {
-		panic(fmt.Errorf("failed to create login instance: %+v, %+v", err, command))
-	}
-
-	ctx, cancelFn := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancelFn()
-
-	process, err := command.Send(ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	return process
 }

@@ -28,12 +28,12 @@ func (s *UserServiceImpl) Signup(username, password string) error {
 func (s *UserServiceImpl) Login(username, password string) (ports.UserDTO, error) {
 	user, err := s.UserRepo.FindByUsername(username)
 	if err != nil {
-		return ports.UserDTO{}, errors.New("invalid username or password")
+		return ports.UserDTO{}, errors.New("invalid username")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return ports.UserDTO{}, errors.New("invalid username or password")
+		return ports.UserDTO{}, errors.New("invalid password")
 	}
 
 	return ports.UserDTO{

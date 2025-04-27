@@ -45,10 +45,11 @@ func checkLoginHandler(jobClient worker.JobClient, job entities.Job, userService
 	user, err := userService.Login(vars.Username, vars.Password)
 	if err != nil {
 		vars.LoginValid = false
+		vars.IsValid = false
 		vars.Error = err.Error()
 	} else {
 		vars.LoginValid = true
-		vars.Username = user.Username // In case username casing was normalized
+		vars.Username = user.Username
 	}
 
 	varsJSON, err := json.Marshal(vars)
@@ -56,7 +57,6 @@ func checkLoginHandler(jobClient worker.JobClient, job entities.Job, userService
 		log.Printf("Failed to marshal variables: %v", err)
 		return
 	}
-
 	tempCommand, err := jobClient.NewCompleteJobCommand().
 		JobKey(job.GetKey()).
 		VariablesFromString(string(varsJSON))
