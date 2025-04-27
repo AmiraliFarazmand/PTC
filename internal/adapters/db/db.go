@@ -35,13 +35,11 @@ func (r *MongoUserRepository) FindByUsername(username string) (domain.User, erro
 	var user domain.User
 	err := r.Collection.FindOne(context.TODO(), bson.M{"username": username}).Decode(&result)
 	if err != nil {
-		log.Println("In FindByUsername method", err)
 		return user, err
 	}
 	user.ID = result.ID.Hex()
 	user.Username = result.Username
 	user.Password = result.Password
-	log.Println("FindByUsername", user, err)
 	return user, err
 }
 
@@ -53,13 +51,11 @@ func (r *MongoUserRepository) FindByID(id string) (domain.User, error) {
 	}
 	objectID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
-		log.Println("Invalid ObjectID format:", err, id)
 		return domain.User{}, err
 	}
 
 	err = r.Collection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&result)
 	if err != nil {
-		log.Println("In FindByID method", err)
 		return domain.User{}, err
 	}
 
