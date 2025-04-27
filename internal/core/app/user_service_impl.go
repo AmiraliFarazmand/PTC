@@ -42,8 +42,8 @@ func (s *UserServiceImpl) Login(username, password string) (ports.UserDTO, error
 	}, nil
 }
 
-func (s *UserServiceImpl) FindUserByID(userID string) (ports.UserDTO, error) {
-	user, err := s.UserRepo.FindByID(userID)
+func (s *UserServiceImpl) FindUserByUsername(userName string) (ports.UserDTO, error) {
+	user, err := s.UserRepo.FindByUsername(userName)
 	if err != nil {
 		return ports.UserDTO{}, errors.New("user not found")
 	}

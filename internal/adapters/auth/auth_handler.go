@@ -122,13 +122,13 @@ func (h *AuthHandler) RequireAuth(c *gin.Context) {
 		return
 	}
 
-	userID, ok := claims["sub"].(string)
+	userName, ok := claims["sub"].(string)
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID in token"})
 		return
 	}
 
-	user, err := h.UserService.FindUserByID(userID)
+	user, err := h.UserService.FindUserByUsername(userName)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 		return
