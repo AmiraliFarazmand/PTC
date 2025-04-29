@@ -36,6 +36,15 @@ func (s *GinServer) confirmPayment(c *gin.Context) {
 }
 
 func (s *GinServer) processPurchase(c *gin.Context) {
+	var body struct {
+		Amount  int    `json:"amount" binding:"required"`
+		Address string `json:"address" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(400, gin.H{"error": "Invalid request body"})
+		return
+	}
+
 	user, exists := c.Get("user")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
@@ -46,14 +55,7 @@ func (s *GinServer) processPurchase(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cast user"})
 		return
 	}
-	var body struct {
-		Amount  int    `json:"amount" binding:"required"`
-		Address string `json:"address" binding:"required"`
-	}
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(400, gin.H{"error": "Invalid request body"})
-		return
-	}
+
 	purchaseID, err := s.PurchaseService.CreatePurchase(userDTO.ID, body.Amount, body.Address)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})

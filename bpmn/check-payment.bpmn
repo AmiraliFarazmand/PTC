@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0m0s9vj" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.34.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.7.0">
+  <bpmn:process id="CheckPaymentProcess" name="check payment" isExecutable="true">
+    <bpmn:startEvent id="trigger-check-payment-process" name="start-event">
+      <bpmn:messageEventDefinition id="MessageEventDefinition_06b6xli" messageRef="Message_2g9n59a" />
+    </bpmn:startEvent>
+  </bpmn:process>
+  <bpmn:message id="Message_2g9n59a" name="start-check-payment" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="CheckPaymentProcess">
+      <bpmndi:BPMNShape id="Event_1boq9cd_di" bpmnElement="trigger-check-payment-process">
+        <dc:Bounds x="182" y="82" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="175" y="125" width="52" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

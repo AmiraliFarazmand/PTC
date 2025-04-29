@@ -46,7 +46,7 @@ func validateCredentialHandler(jobClient worker.JobClient, job entities.Job, use
 	}
 
 	// Validate credentials
-	isUsernameUnique, err := userRepo.IsUsernameUnique(vars.Username)
+	isUsernameUnique, err := userRepo.IsUsernameUnique(vars.Username) // TODO: az user service call she too on user repo call she
 	if err != nil || !isUsernameUnique {
 		vars.IsValid = false
 		vars.Error = "username already exists"

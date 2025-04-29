@@ -19,7 +19,7 @@ func NewMongoPurchaseRepository(collection *mongo.Collection) ports.PurchaseRepo
 	return &MongoPurchaseRepository{Collection: collection}
 }
 
-func (r *MongoPurchaseRepository) Create(purchase *domain.Purchase) error {
+func (r *MongoPurchaseRepository) Create(purchase *domain.Purchase) error {  
 	purchaseID, err := bson.ObjectIDFromHex(purchase.ID)
 	if err != nil {
 		return err

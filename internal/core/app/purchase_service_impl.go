@@ -14,7 +14,7 @@ type PurchaseServiceImpl struct {
 
 var _ ports.PurchaseService = (*PurchaseServiceImpl)(nil) // Verify interface implementation
 
-func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address string) (string, error) {
+func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address string) (string, error) { 
 	purchaseID := utils.GenerateRandomID()
 
 	purchase := &domain.Purchase{
