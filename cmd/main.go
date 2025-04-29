@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/db"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/http"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/zeebe"
@@ -34,13 +36,19 @@ func main() {
 	createUserJobWorker := zeebe.CreateUserWorker(zeebeClient, userService)
 	loginCheckWorker := zeebe.CheckLoginRequestWorker(zeebeClient, userService)
 	loginTokenWorker := zeebe.CreateLoginTokenWorker(zeebeClient)
+	purchaseWorker := zeebe.CreatePurchaseWorker(zeebeClient, purchaseService)
+	// cancelPurchaseWorker := zeebe.CancelPurchaseWorker(zeebeClient, purchaseService)
 
 	defer validateJobWorker.Close()
 	defer createUserJobWorker.Close()
 	defer loginCheckWorker.Close()
 	defer loginTokenWorker.Close()
+	defer purchaseWorker.Close()
+	// defer cancelPurchaseWorker.Close()
 
 	// Initialize and start HTTP server
-	server := http.NewGinServer(purchaseService, userService, processManager)
-	server.Start()
+	server := http.NewGinServer(purchaseService, userService, processManager, zeebeClient)
+	if err := server.Run(); err != nil {
+		log.Fatal("Failed to start server:", err)
+	}
 }

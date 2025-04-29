@@ -1,6 +1,8 @@
 package app
 
 import (
+	"fmt"
+	"log"
 	"time"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
@@ -26,7 +28,10 @@ func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address 
 		PaymentID: "",
 		Address:   address,
 	}
-
+	log.Println("alaki mirese inja, ", amount, address)
+	if amount <=0 || address == "" {
+		return "", fmt.Errorf("invalid purchase details") 
+	}
 	if err := s.PurchaseRepo.Create(purchase); err != nil {
 		return "", err
 	}

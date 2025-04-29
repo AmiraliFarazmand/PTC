@@ -3,7 +3,7 @@ package http
 import (
 	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/auth"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
-	"github.com/AmiraliFarazmand/PTC_Task/internal/utils"
+	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/zbc"
 	"github.com/gin-gonic/gin"
 )
 
@@ -11,31 +11,34 @@ type GinServer struct {
 	PurchaseService ports.PurchaseService
 	UserService     ports.UserService
 	ProcessManager  ports.ZeebeProcessManager
+	ZeebeClient     zbc.Client
+	Router          *gin.Engine
 }
 
-func NewGinServer(purchaseService ports.PurchaseService, userService ports.UserService, processManager ports.ZeebeProcessManager) *GinServer {
-	return &GinServer{
+func NewGinServer(purchaseService ports.PurchaseService, userService ports.UserService, processManager ports.ZeebeProcessManager, zeebeClient zbc.Client) *GinServer {
+	server := &GinServer{
 		PurchaseService: purchaseService,
 		UserService:     userService,
 		ProcessManager:  processManager,
+		ZeebeClient:     zeebeClient,
+		Router:          gin.Default(),
 	}
-}
-
-func (s *GinServer) Start() {
-	r := gin.Default()
 
 	// User routes
-	authHandler := auth.NewAuthHandler(s.UserService, s.ProcessManager)
-	//authentication routes
-	r.POST("/signup", authHandler.Signup)
-	r.POST("/login", authHandler.Login)
-	r.GET("/validate", authHandler.RequireAuth, authHandler.ValidateHnadler)
+	authHandler := auth.NewAuthHandler(server.UserService, server.ProcessManager)
+
+	// Authentication routes
+	server.Router.POST("/signup", authHandler.Signup)
+	server.Router.POST("/login", authHandler.Login)
+	server.Router.GET("/validate", authHandler.RequireAuth, authHandler.ValidateHnadler)
 
 	// Purchase routes
-	r.POST("/purchase", authHandler.RequireAuth, s.processPurchase)
-	r.PUT("/purchase/pay", authHandler.RequireAuth, s.confirmPayment)
+	server.Router.POST("/purchase", authHandler.RequireAuth, server.processPurchase)
+	server.Router.PUT("/purchase/pay", authHandler.RequireAuth, server.confirmPayment)
 
-	// Start the server
-	ginPort, _ := utils.ReadEnv("GIN_PORT")
-	r.Run(":" + ginPort)
+	return server
+}
+
+func (s *GinServer) Run() error {
+	return s.Router.Run(":8313")
 }
