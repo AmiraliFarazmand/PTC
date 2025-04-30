@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
@@ -67,7 +66,6 @@ func (z *ZeebeProcessManagerImpl) StartPurchaseProcess(userID string, amount int
 	if err != nil {
 		return nil, fmt.Errorf("failed to create command: %w", err)
 	}
-	log.Printf("resid be injaye instance %+v\n",command)
 
 	result, err := command.
 		WithResult().
@@ -82,6 +80,5 @@ func (z *ZeebeProcessManagerImpl) StartPurchaseProcess(userID string, amount int
 	if err := json.Unmarshal([]byte(result.GetVariables()), &resultVars); err != nil {
 		return nil, fmt.Errorf("failed to parse result variables: %w", err)
 	}
-	log.Printf("resid be instance %+v\n", resultVars)
 	return &resultVars, nil
 }

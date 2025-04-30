@@ -27,7 +27,6 @@ func createPurchaseHandler(jobClient worker.JobClient, job entities.Job, purchas
 		log.Printf("Failed to parse variables: %v", err)
 		return
 	}
-	log.Println("too worker mire")
 	// Create purchase using service
 	purchaseID, err := purchaseService.CreatePurchase(vars.UserID, vars.Amount, vars.Address)
 	if err != nil {

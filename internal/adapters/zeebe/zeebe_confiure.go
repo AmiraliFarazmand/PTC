@@ -12,7 +12,7 @@ func NewZeebeClient() zbc.Client {
         UsePlaintextConnection: true,
     })
     if err != nil {
-        // log.Fatalf("###Failed to create Zeebe client: %v", err)
+        log.Fatalf("###Failed to create Zeebe client: %v", err)
     }
     log.Printf("###Zeebe client created successfully\n")
     return client
