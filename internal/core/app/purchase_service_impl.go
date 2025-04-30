@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
@@ -16,7 +15,7 @@ type PurchaseServiceImpl struct {
 
 var _ ports.PurchaseService = (*PurchaseServiceImpl)(nil) // Verify interface implementation
 
-func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address string) (string, error) { 
+func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address string) (string, error) {
 	purchaseID := utils.GenerateRandomID()
 
 	purchase := &domain.Purchase{
@@ -28,9 +27,8 @@ func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address 
 		PaymentID: "",
 		Address:   address,
 	}
-	log.Println("alaki mirese inja, ", amount, address)
-	if amount <=0 || address == "" {
-		return "", fmt.Errorf("invalid purchase details") 
+	if amount <= 0 || address == "" {
+		return "", fmt.Errorf("invalid purchase details")
 	}
 	if err := s.PurchaseRepo.Create(purchase); err != nil {
 		return "", err

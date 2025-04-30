@@ -1,36 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_0m0s9vj" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.34.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.7.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0m0s9vj" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.34.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.7.0">
   <bpmn:process id="CheckPaymentProcess" name="check payment" isExecutable="true">
-    <bpmn:startEvent id="trigger-check-payment-process" name="Payment Request Received">
-      <bpmn:outgoing>Flow_1</bpmn:outgoing>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_06b6xli" messageRef="Message_2g9n59a" />
-    </bpmn:startEvent>
     <bpmn:endEvent id="Event_PaymentProcessed" name="Payment Processed">
       <bpmn:incoming>Flow_1</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1" sourceRef="trigger-check-payment-process" targetRef="Event_PaymentProcessed" />
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="trigger-payment-signal" targetRef="Event_PaymentProcessed" />
+    <bpmn:startEvent id="trigger-payment-signal" name="start payment process">
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+      <bpmn:signalEventDefinition id="SignalEventDefinition_13menng" signalRef="Signal_2o490uo" />
+    </bpmn:startEvent>
   </bpmn:process>
   <bpmn:message id="Message_2g9n59a" name="start-check-payment">
     <bpmn:extensionElements>
       <zeebe:subscription correlationKey="=purchaseId" />
     </bpmn:extensionElements>
   </bpmn:message>
+  <bpmn:message id="Message_1jdh3q2" name="trigger-check-payment-process" />
+  <bpmn:signal id="Signal_2o490uo" name="trigger-payment-signal" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="CheckPaymentProcess">
-      <bpmndi:BPMNShape id="Event_1boq9cd_di" bpmnElement="trigger-check-payment-process">
-        <dc:Bounds x="182" y="82" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="159" y="125" width="82" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_PaymentProcessed_di" bpmnElement="Event_PaymentProcessed">
         <dc:Bounds x="432" y="82" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="405" y="125" width="90" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0mlrjlj_di" bpmnElement="trigger-payment-signal">
+        <dc:Bounds x="192" y="82" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="180" y="125" width="67" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
-        <di:waypoint x="218" y="100" />
+        <di:waypoint x="228" y="100" />
         <di:waypoint x="432" y="100" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
