@@ -37,14 +37,14 @@ func main() {
 	loginCheckWorker := zeebe.CheckLoginRequestWorker(zeebeClient, userService)
 	loginTokenWorker := zeebe.CreateLoginTokenWorker(zeebeClient)
 	purchaseWorker := zeebe.CreatePurchaseWorker(zeebeClient, purchaseService)
-	// cancelPurchaseWorker := zeebe.CancelPurchaseWorker(zeebeClient, purchaseService)
+	processPaymentWorker := zeebe.ProcessPaymentWorker(zeebeClient)
 
 	defer validateJobWorker.Close()
 	defer createUserJobWorker.Close()
 	defer loginCheckWorker.Close()
 	defer loginTokenWorker.Close()
 	defer purchaseWorker.Close()
-	// defer cancelPurchaseWorker.Close()
+	defer processPaymentWorker.Close()
 
 	// Initialize and start HTTP server
 	server := http.NewGinServer(purchaseService, userService, processManager, zeebeClient)

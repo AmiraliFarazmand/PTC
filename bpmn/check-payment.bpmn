@@ -4,9 +4,6 @@
     <bpmn:endEvent id="Event_PaymentProcessed" name="Payment Processed">
       <bpmn:incoming>Flow_1i03h8u</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:startEvent id="trigger-payment-signal" name="start payment process">
-      <bpmn:signalEventDefinition id="SignalEventDefinition_13menng" signalRef="Signal_2o490uo" />
-    </bpmn:startEvent>
     <bpmn:startEvent id="trigger-check-payment-process" name="Payment Request Received">
       <bpmn:outgoing>Flow_1i03h8u</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_06b6xli" messageRef="Message_2g9n59a" />
@@ -23,22 +20,16 @@
   <bpmn:message id="Message_1onljjl" name="Message_1onljjl" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="CheckPaymentProcess">
-      <bpmndi:BPMNShape id="Event_1boq9cd_di" bpmnElement="trigger-check-payment-process">
-        <dc:Bounds x="182" y="82" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="156" y="125" width="88" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0mlrjlj_di" bpmnElement="trigger-payment-signal">
-        <dc:Bounds x="172" y="422" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="160" y="465" width="67" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_PaymentProcessed_di" bpmnElement="Event_PaymentProcessed">
         <dc:Bounds x="542" y="72" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="534" y="115" width="52" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1boq9cd_di" bpmnElement="trigger-check-payment-process">
+        <dc:Bounds x="182" y="82" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="156" y="125" width="88" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1i03h8u_di" bpmnElement="Flow_1i03h8u">

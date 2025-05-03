@@ -3,6 +3,7 @@ package zeebe
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
@@ -11,6 +12,11 @@ import (
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/worker"
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/zbc"
 )
+
+// type FilaanClient struct {
+// 	zbc.Client
+// 	purchaseService ports.PurchaseService
+// } TODO: convert into this approach
 
 func CreatePurchaseWorker(client zbc.Client, purchaseService ports.PurchaseService) worker.JobWorker {
 	return client.NewJobWorker().
@@ -55,4 +61,54 @@ func createPurchaseHandler(jobClient worker.JobClient, job entities.Job, purchas
 	if _, err := command.Send(context.Background()); err != nil {
 		log.Printf("Failed to complete job: %v", err)
 	}
+}
+
+func ProcessPaymentWorker(client zbc.Client) worker.JobWorker {
+	client.NewJobWorker().
+		JobType("start-payment-process").
+		Handler(func(jobClient worker.JobClient, job entities.Job) {
+			handleStartPayment(client, jobClient, job)
+		}).
+		Open()
+	fmt.Println("Workers are running...")
+	select {}
+}
+func handleStartPayment(zeebeClient zbc.Client, client worker.JobClient, job entities.Job) {
+	// Get variables from the job
+	variables, err := job.GetVariablesAsMap()
+	if err != nil {
+		log.Println("Failed to get variables:", err)
+		return
+	}
+
+	purchaseID, ok := variables["purchase_id"].(string)
+	if !ok {
+		log.Println("purchase_id not found in variables")
+		return
+	}
+
+	// Publish message to trigger CheckPaymentProcess
+	ctx := context.Background()
+	tempCommand, err := zeebeClient.NewPublishMessageCommand().
+		MessageName("start-check-payment"). // Must match message name in BPMN
+		CorrelationKey(purchaseID).         // Used to correlate the message
+		VariablesFromMap(variables)         // Pass along all variables
+	tempCommand.Send(ctx)
+
+	if err != nil {
+		log.Println("Failed to publish message:", err)
+		return
+	}
+
+	// Complete the task
+	_, err = client.NewCompleteJobCommand().
+		JobKey(job.GetKey()).
+		Send(ctx)
+
+	if err != nil {
+		log.Println("Failed to complete start-payment-process:", err)
+		return
+	}
+
+	log.Printf("Triggered payment check for purchase %s", purchaseID)
 }

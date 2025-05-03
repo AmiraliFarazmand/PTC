@@ -31,23 +31,6 @@
       <bpmn:incoming>Flow_1</bpmn:incoming>
       <bpmn:outgoing>Flow_0ucuw5i</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:endEvent id="trigger-payment-signal" name="trigger payment">
-      <bpmn:extensionElements>
-        <zeebe:ioMapping>
-          <zeebe:output source="=purchase_id" target="purchase_id" />
-        </zeebe:ioMapping>
-      </bpmn:extensionElements>
-      <bpmn:signalEventDefinition id="SignalEventDefinition_0p1igjv" signalRef="Signal_2mjtvrb" />
-    </bpmn:endEvent>
-    <bpmn:endEvent id="trigger-check-payment-process" name="trigger check-payment process">
-      <bpmn:extensionElements>
-        <zeebe:taskDefinition type="trigger-check-payment-process" retries="5" />
-        <zeebe:ioMapping>
-          <zeebe:output source="=purchase_id" target="purchase_id" />
-        </zeebe:ioMapping>
-      </bpmn:extensionElements>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_0wjs95n" />
-    </bpmn:endEvent>
     <bpmn:intermediateThrowEvent id="start-payment-process">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="start-payment-process" retries="5" />
@@ -56,9 +39,6 @@
       <bpmn:outgoing>Flow_0uwhfvw</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_166j9jj" />
     </bpmn:intermediateThrowEvent>
-    <bpmn:startEvent id="Event_10uh7jf">
-      <bpmn:messageEventDefinition id="MessageEventDefinition_0hsc5e8" messageRef="Message_2qn6kt7" />
-    </bpmn:startEvent>
     <bpmn:endEvent id="Event_0v8ian6">
       <bpmn:incoming>Flow_0uwhfvw</bpmn:incoming>
     </bpmn:endEvent>
@@ -94,27 +74,16 @@
       <bpmndi:BPMNShape id="Activity_0v6jgv5_di" bpmnElement="create-purchase-task">
         <dc:Bounds x="250" y="190" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1gii5gy_di" bpmnElement="trigger-payment-signal">
-        <dc:Bounds x="682" y="82" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="662" y="125" width="77" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0ydr38i_di" bpmnElement="start-payment-process">
         <dc:Bounds x="532" y="122" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0v8ian6_di" bpmnElement="Event_0v8ian6">
         <dc:Bounds x="622" y="152" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0da3nz8_di" bpmnElement="trigger-check-payment-process">
-        <dc:Bounds x="752" y="82" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="732" y="118" width="85" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1bbobjc_di" bpmnElement="Event_10uh7jf">
-        <dc:Bounds x="832" y="72" width="36" height="36" />
-      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0ucuw5i_di" bpmnElement="Flow_0ucuw5i">
+        <di:waypoint x="350" y="230" />
+        <di:waypoint x="395" y="230" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
         <di:waypoint x="188" y="230" />
         <di:waypoint x="250" y="230" />
@@ -126,10 +95,6 @@
         <bpmndi:BPMNLabel>
           <dc:Bounds x="429" y="325" width="13" height="14" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0ucuw5i_di" bpmnElement="Flow_0ucuw5i">
-        <di:waypoint x="350" y="230" />
-        <di:waypoint x="395" y="230" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1d0jbs1_di" bpmnElement="yes_flow">
         <di:waypoint x="420" y="205" />
