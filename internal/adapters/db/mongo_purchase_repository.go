@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
@@ -19,7 +18,7 @@ func NewMongoPurchaseRepository(collection *mongo.Collection) ports.PurchaseRepo
 	return &MongoPurchaseRepository{Collection: collection}
 }
 
-func (r *MongoPurchaseRepository) Create(purchase *domain.Purchase) error {  
+func (r *MongoPurchaseRepository) Create(purchase *domain.Purchase) error {
 	purchaseID, err := bson.ObjectIDFromHex(purchase.ID)
 	if err != nil {
 		return err
@@ -100,17 +99,24 @@ func (r *MongoPurchaseRepository) UpdateStatus(purchaseID string, status string,
 	return err
 }
 
-func (r *MongoPurchaseRepository) CancelOldUnpaid(cutoff time.Time) (int64, error) {
+func (r *MongoPurchaseRepository) CancelPurchase(purchaseID string) error {
+	objectID, err := bson.ObjectIDFromHex(purchaseID)
+	if err != nil {
+		return err
+	}
 	filter := bson.M{
-		"status":     "pending",
-		"created_at": bson.M{"$lt": cutoff},
+		"status": "pending",
+		"_id":    objectID,
 	}
 	update := bson.M{
 		"$set": bson.M{"status": "cancelled"},
 	}
-	result, err := r.Collection.UpdateMany(context.TODO(), filter, update)
+	result, err := r.Collection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	return result.ModifiedCount, nil
+	if result.UpsertedCount == 0 {
+		return fmt.Errorf("no pending purchase found with this ID")
+	}
+	return nil
 }

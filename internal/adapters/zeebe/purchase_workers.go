@@ -69,8 +69,8 @@ func ProcessPaymentWorker(client zbc.Client) worker.JobWorker {
 			handleStartPayment(client, jobClient, job)
 		}).
 		Open()
-		log.Printf("###IDK:%+v\n", jobWorker)
-		return jobWorker
+	log.Printf("###IDK:%+v\n", jobWorker)
+	return jobWorker
 }
 
 func handleStartPayment(zeebeClient zbc.Client, client worker.JobClient, job entities.Job) {
@@ -108,5 +108,47 @@ func handleStartPayment(zeebeClient zbc.Client, client worker.JobClient, job ent
 	if err != nil {
 		log.Println("Failed to complete start-payment-process:", err)
 		return
+	}
+}
+
+func CancelUnpaidPurchaseWorker(client zbc.Client, purchaseService ports.PurchaseService) worker.JobWorker {
+	return client.NewJobWorker().
+		JobType("cancel-if-unpaid-task").
+		Handler(func(jobClient worker.JobClient, job entities.Job) {
+			cancelUnpaidHandler(jobClient, job, purchaseService)
+		}).
+		Open()
+}
+
+func cancelUnpaidHandler(jobClient worker.JobClient, job entities.Job, purchaseService ports.PurchaseService) {
+	var vars domain.PurchaseProcessVariables
+	if err := json.Unmarshal([]byte(job.GetVariables()), &vars); err != nil {
+		log.Printf("Failed to parse variables: %v", err)
+		return
+	}
+
+	err := purchaseService.CancelUnpaidPurchase(vars.PurchaseID)
+	if err != nil {
+		vars.IsValid = false
+		vars.Error = err.Error()
+	}
+
+	varsJSON, err := json.Marshal(vars)
+	if err != nil {
+		log.Printf("Failed to marshal variables: %v", err)
+		return
+	}
+
+	command, err := jobClient.NewCompleteJobCommand().
+		JobKey(job.GetKey()).
+		VariablesFromString(string(varsJSON))
+
+	if err != nil {
+		log.Printf("Failed to create complete job command: %v", err)
+		return
+	}
+
+	if _, err := command.Send(context.Background()); err != nil {
+		log.Printf("Failed to complete job: %v", err)
 	}
 }

@@ -42,8 +42,9 @@ func (s *PurchaseServiceImpl) ConfirmPayment(purchaseID string, userID string) e
 	return s.PurchaseRepo.UpdateStatus(purchaseID, "packaging and delivering", paymentID, userID)
 }
 
-func (s *PurchaseServiceImpl) CancelUnpaidPurchases(cutoff time.Time) (int64, error) {
-	return s.PurchaseRepo.CancelOldUnpaid(cutoff)
+
+func (s *PurchaseServiceImpl) CancelUnpaidPurchase(purchaseID string) error {
+	return s.PurchaseRepo.CancelPurchase(purchaseID)
 }
 
 func generatePaymentID(purchaseID string) string {

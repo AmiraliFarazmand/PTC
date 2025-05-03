@@ -1,14 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0m0s9vj" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.34.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.7.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0m0s9vj" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.34.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.7.0">
   <bpmn:process id="CheckPaymentProcess" name="check payment" isExecutable="true">
     <bpmn:endEvent id="Event_PaymentProcessed" name="Payment Processed">
-      <bpmn:incoming>Flow_1i03h8u</bpmn:incoming>
+      <bpmn:incoming>Flow_0gsv2ja</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:startEvent id="trigger-check-payment-process" name="Payment Request Received">
       <bpmn:outgoing>Flow_1i03h8u</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_06b6xli" messageRef="Message_2g9n59a" />
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="Flow_1i03h8u" sourceRef="trigger-check-payment-process" targetRef="Event_PaymentProcessed" />
+    <bpmn:sequenceFlow id="Flow_1i03h8u" sourceRef="trigger-check-payment-process" targetRef="timer_2min_event" />
+    <bpmn:intermediateCatchEvent id="timer_2min_event" name="wait for 2 minutes">
+      <bpmn:incoming>Flow_1i03h8u</bpmn:incoming>
+      <bpmn:outgoing>Flow_05glaoz</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_0ccdig5">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT20S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="cancel-if-unpaid-task" name="cancel if it is unpaid">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="cancel-if-unpaid-task" retries="5" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_05glaoz</bpmn:incoming>
+      <bpmn:outgoing>Flow_0gsv2ja</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_05glaoz" sourceRef="timer_2min_event" targetRef="cancel-if-unpaid-task" />
+    <bpmn:sequenceFlow id="Flow_0gsv2ja" sourceRef="cancel-if-unpaid-task" targetRef="Event_PaymentProcessed" />
   </bpmn:process>
   <bpmn:message id="Message_2g9n59a" name="start-check-payment">
     <bpmn:extensionElements>
@@ -20,23 +36,38 @@
   <bpmn:message id="Message_1onljjl" name="Message_1onljjl" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="CheckPaymentProcess">
-      <bpmndi:BPMNShape id="Event_PaymentProcessed_di" bpmnElement="Event_PaymentProcessed">
-        <dc:Bounds x="542" y="72" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="534" y="115" width="52" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1boq9cd_di" bpmnElement="trigger-check-payment-process">
         <dc:Bounds x="182" y="82" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="156" y="125" width="88" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0o35ato_di" bpmnElement="timer_2min_event">
+        <dc:Bounds x="322" y="82" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="299" y="125" width="86" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0v8q3cq_di" bpmnElement="cancel-if-unpaid-task">
+        <dc:Bounds x="410" y="60" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_PaymentProcessed_di" bpmnElement="Event_PaymentProcessed">
+        <dc:Bounds x="582" y="82" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="574" y="125" width="52" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1i03h8u_di" bpmnElement="Flow_1i03h8u">
         <di:waypoint x="218" y="100" />
-        <di:waypoint x="270" y="100" />
-        <di:waypoint x="270" y="90" />
-        <di:waypoint x="542" y="90" />
+        <di:waypoint x="322" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05glaoz_di" bpmnElement="Flow_05glaoz">
+        <di:waypoint x="358" y="100" />
+        <di:waypoint x="410" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0gsv2ja_di" bpmnElement="Flow_0gsv2ja">
+        <di:waypoint x="510" y="100" />
+        <di:waypoint x="582" y="100" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
