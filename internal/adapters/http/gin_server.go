@@ -34,7 +34,7 @@ func NewGinServer(purchaseService ports.PurchaseService, userService ports.UserS
 
 	// Purchase routes
 	server.Router.POST("/purchase", authHandler.RequireAuth, server.processPurchase)
-	server.Router.PUT("/purchase/pay", authHandler.RequireAuth, server.confirmPayment)
+	server.Router.PUT("/purchase/pay/:id", authHandler.RequireAuth, server.confirmPayment)
 
 	return server
 }
