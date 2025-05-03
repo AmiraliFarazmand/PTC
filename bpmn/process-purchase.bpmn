@@ -5,9 +5,6 @@
     <bpmn:startEvent id="start_purchase_event" name="Authenticated user sends valid request">
       <bpmn:outgoing>Flow_1</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:endEvent id="Event_0x73h1h" name="ended with error">
-      <bpmn:incoming>not-valid-flow</bpmn:incoming>
-    </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_0ucuw5i" sourceRef="create-purchase-task" targetRef="is_valid_gateway" />
     <bpmn:sequenceFlow id="Flow_1" sourceRef="start_purchase_event" targetRef="create-purchase-task" />
     <bpmn:sequenceFlow id="not-valid-flow" name="no" sourceRef="is_valid_gateway" targetRef="Event_0x73h1h">
@@ -39,10 +36,15 @@
       <bpmn:outgoing>Flow_0uwhfvw</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_166j9jj" />
     </bpmn:intermediateThrowEvent>
-    <bpmn:endEvent id="Event_0v8ian6">
+    <bpmn:sequenceFlow id="Flow_0uwhfvw" sourceRef="start-payment-process" targetRef="end_event" />
+    <bpmn:endEvent id="end_event" name="end ">
       <bpmn:incoming>Flow_0uwhfvw</bpmn:incoming>
+      <bpmn:terminateEventDefinition id="TerminateEventDefinition_0qiajss" />
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0uwhfvw" sourceRef="start-payment-process" targetRef="Event_0v8ian6" />
+    <bpmn:endEvent id="Event_0x73h1h" name="ended with error">
+      <bpmn:incoming>not-valid-flow</bpmn:incoming>
+      <bpmn:terminateEventDefinition id="TerminateEventDefinition_0g3bvy2" />
+    </bpmn:endEvent>
   </bpmn:process>
   <bpmn:message id="Message_PaymentReceived" name="PaymentReceived">
     <bpmn:extensionElements>
@@ -59,12 +61,6 @@
           <dc:Bounds x="130" y="248" width="80" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0x73h1h_di" bpmnElement="Event_0x73h1h">
-        <dc:Bounds x="682" y="382" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="661" y="425" width="80" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_0znqilj_di" bpmnElement="is_valid_gateway" isMarkerVisible="true">
         <dc:Bounds x="395" y="205" width="50" height="50" />
         <bpmndi:BPMNLabel>
@@ -77,8 +73,17 @@
       <bpmndi:BPMNShape id="Event_0ydr38i_di" bpmnElement="start-payment-process">
         <dc:Bounds x="532" y="122" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0v8ian6_di" bpmnElement="Event_0v8ian6">
+      <bpmndi:BPMNShape id="Event_1m8z348_di" bpmnElement="end_event">
         <dc:Bounds x="622" y="152" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="631" y="195" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ba20rs_di" bpmnElement="Event_0x73h1h">
+        <dc:Bounds x="682" y="382" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="661" y="425" width="80" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0ucuw5i_di" bpmnElement="Flow_0ucuw5i">
         <di:waypoint x="350" y="230" />

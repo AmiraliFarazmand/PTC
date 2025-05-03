@@ -40,5 +40,5 @@ func NewGinServer(purchaseService ports.PurchaseService, userService ports.UserS
 }
 
 func (s *GinServer) Run() error {
-	return s.Router.Run(":8313")
+	return s.Router.Run(":9090")
 }

@@ -3,7 +3,6 @@ package zeebe
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
@@ -64,15 +63,16 @@ func createPurchaseHandler(jobClient worker.JobClient, job entities.Job, purchas
 }
 
 func ProcessPaymentWorker(client zbc.Client) worker.JobWorker {
-	client.NewJobWorker().
+	jobWorker := client.NewJobWorker().
 		JobType("start-payment-process").
 		Handler(func(jobClient worker.JobClient, job entities.Job) {
 			handleStartPayment(client, jobClient, job)
 		}).
 		Open()
-	fmt.Println("Workers are running...")
-	select {}
+		log.Printf("###IDK:%+v\n", jobWorker)
+		return jobWorker
 }
+
 func handleStartPayment(zeebeClient zbc.Client, client worker.JobClient, job entities.Job) {
 	// Get variables from the job
 	variables, err := job.GetVariablesAsMap()
@@ -109,6 +109,4 @@ func handleStartPayment(zeebeClient zbc.Client, client worker.JobClient, job ent
 		log.Println("Failed to complete start-payment-process:", err)
 		return
 	}
-
-	log.Printf("Triggered payment check for purchase %s", purchaseID)
 }
