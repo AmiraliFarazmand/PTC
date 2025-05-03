@@ -16,6 +16,10 @@ type PurchaseServiceImpl struct {
 var _ ports.PurchaseService = (*PurchaseServiceImpl)(nil) // Verify interface implementation
 
 func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address string) (string, error) {
+	if amount <= 0 || address == "" {
+		return "", fmt.Errorf("invalid purchase details")
+	}
+
 	purchaseID := utils.GenerateRandomID()
 
 	purchase := &domain.Purchase{
@@ -26,9 +30,6 @@ func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address 
 		Status:    "pending",
 		PaymentID: "",
 		Address:   address,
-	}
-	if amount <= 0 || address == "" {
-		return "", fmt.Errorf("invalid purchase details")
 	}
 	if err := s.PurchaseRepo.Create(purchase); err != nil {
 		return "", err
@@ -41,7 +42,6 @@ func (s *PurchaseServiceImpl) ConfirmPayment(purchaseID string, userID string) e
 	paymentID := generatePaymentID(purchaseID)
 	return s.PurchaseRepo.UpdateStatus(purchaseID, "packaging and delivering", paymentID, userID)
 }
-
 
 func (s *PurchaseServiceImpl) CancelUnpaidPurchase(purchaseID string) error {
 	return s.PurchaseRepo.CancelPurchase(purchaseID)

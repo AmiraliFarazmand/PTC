@@ -26,6 +26,26 @@ func CreatePurchaseWorker(client zbc.Client, purchaseService ports.PurchaseServi
 		Open()
 }
 
+func ProcessPaymentWorker(client zbc.Client) worker.JobWorker {
+	jobWorker := client.NewJobWorker().
+		JobType("start-payment-process").
+		Handler(func(jobClient worker.JobClient, job entities.Job) {
+			startPaymentHandler(client, jobClient, job)
+		}).
+		Open()
+	log.Printf("###IDK:%+v\n", jobWorker)
+	return jobWorker
+}
+
+func CancelUnpaidPurchaseWorker(client zbc.Client, purchaseService ports.PurchaseService) worker.JobWorker {
+	return client.NewJobWorker().
+		JobType("cancel-if-unpaid-task").
+		Handler(func(jobClient worker.JobClient, job entities.Job) {
+			cancelUnpaidHandler(jobClient, job, purchaseService)
+		}).
+		Open()
+}
+
 func createPurchaseHandler(jobClient worker.JobClient, job entities.Job, purchaseService ports.PurchaseService) {
 	var vars domain.PurchaseProcessVariables
 	if err := json.Unmarshal([]byte(job.GetVariables()), &vars); err != nil {
@@ -62,18 +82,7 @@ func createPurchaseHandler(jobClient worker.JobClient, job entities.Job, purchas
 	}
 }
 
-func ProcessPaymentWorker(client zbc.Client) worker.JobWorker {
-	jobWorker := client.NewJobWorker().
-		JobType("start-payment-process").
-		Handler(func(jobClient worker.JobClient, job entities.Job) {
-			handleStartPayment(client, jobClient, job)
-		}).
-		Open()
-	log.Printf("###IDK:%+v\n", jobWorker)
-	return jobWorker
-}
-
-func handleStartPayment(zeebeClient zbc.Client, client worker.JobClient, job entities.Job) {
+func startPaymentHandler(zeebeClient zbc.Client, client worker.JobClient, job entities.Job) {
 	// Get variables from the job
 	variables, err := job.GetVariablesAsMap()
 	if err != nil {
@@ -109,15 +118,6 @@ func handleStartPayment(zeebeClient zbc.Client, client worker.JobClient, job ent
 		log.Println("Failed to complete start-payment-process:", err)
 		return
 	}
-}
-
-func CancelUnpaidPurchaseWorker(client zbc.Client, purchaseService ports.PurchaseService) worker.JobWorker {
-	return client.NewJobWorker().
-		JobType("cancel-if-unpaid-task").
-		Handler(func(jobClient worker.JobClient, job entities.Job) {
-			cancelUnpaidHandler(jobClient, job, purchaseService)
-		}).
-		Open()
 }
 
 func cancelUnpaidHandler(jobClient worker.JobClient, job entities.Job, purchaseService ports.PurchaseService) {

@@ -8,7 +8,7 @@
     <bpmn:sequenceFlow id="Flow_0ucuw5i" sourceRef="create-purchase-task" targetRef="is_valid_gateway" />
     <bpmn:sequenceFlow id="Flow_1" sourceRef="start_purchase_event" targetRef="create-purchase-task" />
     <bpmn:sequenceFlow id="not-valid-flow" name="no" sourceRef="is_valid_gateway" targetRef="Event_0x73h1h">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isValid = false</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=not(isValid) </bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:exclusiveGateway id="is_valid_gateway" name="was successful and valid">
       <bpmn:incoming>Flow_0ucuw5i</bpmn:incoming>
@@ -16,14 +16,11 @@
       <bpmn:outgoing>yes_flow</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="yes_flow" name="yes" sourceRef="is_valid_gateway" targetRef="start-payment-process">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isValid = true</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isValid </bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="create-purchase-task" name="Create Purchase (Pending)">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="create-purchase-task" retries="5" />
-        <zeebe:ioMapping>
-          <zeebe:output source="=purchase_id" target="purchase_id" />
-        </zeebe:ioMapping>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1</bpmn:incoming>
       <bpmn:outgoing>Flow_0ucuw5i</bpmn:outgoing>
