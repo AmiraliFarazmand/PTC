@@ -81,3 +81,39 @@ func StartLoginProcessInstanceWithResult(client zbc.Client, username, password s
 
 	return &resultVars, nil
 }
+
+func StartPurchaseProcessWithResult(client zbc.Client, userID, address string, amount int) (*domain.PurchaseProcessVariables, error) {
+
+	variables := domain.PurchaseProcessVariables{
+		IsValid: true,
+		UserID:  userID,
+		Amount:  amount,
+		Address: address,
+	}
+
+	ctx, cancelFn := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancelFn()
+
+	command, err := client.NewCreateInstanceCommand().
+		BPMNProcessId("PurchaseProcess").
+		LatestVersion().
+		VariablesFromObject(variables)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create command: %w", err)
+	}
+
+	result, err := command.
+		WithResult().
+		FetchVariables("purchase_id", "isValid", "error").
+		Send(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to create and complete purchase instance: %w", err)
+	}
+
+	var resultVars domain.PurchaseProcessVariables
+	if err := json.Unmarshal([]byte(result.GetVariables()), &resultVars); err != nil {
+		return nil, fmt.Errorf("failed to parse result variables: %w", err)
+	}
+	return &resultVars, nil
+}

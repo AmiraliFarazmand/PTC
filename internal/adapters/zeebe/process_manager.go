@@ -1,17 +1,14 @@
 package zeebe
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/core/domain"
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/zbc"
 )
 
 type ZeebeProcessManagerImpl struct {
-	client zbc.Client  //TODO: in harekat roo purchase bezan
+	client zbc.Client //TODO: in harekat roo purchase bezan
 }
 
 func NewZeebeProcessManager(client zbc.Client) *ZeebeProcessManagerImpl {
@@ -49,36 +46,15 @@ func (z *ZeebeProcessManagerImpl) StartLoginProcess(username, password string) (
 
 // TODO: instance saakhtane in mesle baghie beshe.
 func (z *ZeebeProcessManagerImpl) StartPurchaseProcess(userID string, amount int, address string) (*domain.PurchaseProcessVariables, error) {
-	variables := domain.PurchaseProcessVariables{
-		UserID:  userID,
-		Amount:  amount,
-		Address: address,
-		IsValid: true,
-	}
-
-	ctx, cancelFn := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancelFn()
-
-	command, err := z.client.NewCreateInstanceCommand().
-		BPMNProcessId("PurchaseProcess").
-		LatestVersion().
-		VariablesFromObject(variables)
+	result, err := StartPurchaseProcessWithResult(z.client, userID, address, amount)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create command: %w", err)
+		return nil, fmt.Errorf("failed to create purchase: %w", err)
 	}
 
-	result, err := command.
-		WithResult().
-		FetchVariables("purchase_id", "isValid", "error").
-		Send(ctx)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to create and complete purchase instance: %w", err)
+	if result.Error != "" {
+		return nil, fmt.Errorf(result.Error)
 	}
 
-	var resultVars domain.PurchaseProcessVariables
-	if err := json.Unmarshal([]byte(result.GetVariables()), &resultVars); err != nil {
-		return nil, fmt.Errorf("failed to parse result variables: %w", err)
-	}
-	return &resultVars, nil
+	return result, nil
+
 }

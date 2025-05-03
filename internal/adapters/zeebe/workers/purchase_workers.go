@@ -1,4 +1,4 @@
-package zeebe
+package workers
 
 import (
 	"context"
@@ -33,7 +33,6 @@ func ProcessPaymentWorker(client zbc.Client) worker.JobWorker {
 			startPaymentHandler(client, jobClient, job)
 		}).
 		Open()
-	log.Printf("###IDK:%+v\n", jobWorker)
 	return jobWorker
 }
 

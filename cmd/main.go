@@ -6,6 +6,7 @@ import (
 	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/db"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/http"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/zeebe"
+	"github.com/AmiraliFarazmand/PTC_Task/internal/adapters/zeebe/workers"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/core/app"
 	"github.com/AmiraliFarazmand/PTC_Task/internal/utils"
 )
@@ -32,13 +33,13 @@ func main() {
 	processManager := zeebe.NewZeebeProcessManager(zeebeClient)
 
 	// Start Zeebe workers
-	validateJobWorker := zeebe.ValidateCredentialsWorker(zeebeClient, userRepo)
-	createUserJobWorker := zeebe.CreateUserWorker(zeebeClient, userService)
-	loginCheckWorker := zeebe.CheckLoginRequestWorker(zeebeClient, userService)
-	loginTokenWorker := zeebe.CreateLoginTokenWorker(zeebeClient)
-	purchaseWorker := zeebe.CreatePurchaseWorker(zeebeClient, purchaseService)
-	cancelUnpaidPurchaeWorker := zeebe.CancelUnpaidPurchaseWorker(zeebeClient, purchaseService)
-	processPaymentWorker := zeebe.ProcessPaymentWorker(zeebeClient)
+	validateJobWorker := workers.ValidateCredentialsWorker(zeebeClient, userRepo)
+	createUserJobWorker := workers.CreateUserWorker(zeebeClient, userService)
+	loginCheckWorker := workers.CheckLoginRequestWorker(zeebeClient, userService)
+	loginTokenWorker := workers.CreateLoginTokenWorker(zeebeClient)
+	purchaseWorker := workers.CreatePurchaseWorker(zeebeClient, purchaseService)
+	cancelUnpaidPurchaeWorker := workers.CancelUnpaidPurchaseWorker(zeebeClient, purchaseService)
+	processPaymentWorker := workers.ProcessPaymentWorker(zeebeClient)
 
 	defer validateJobWorker.Close()
 	defer createUserJobWorker.Close()
