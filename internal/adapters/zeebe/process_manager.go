@@ -11,7 +11,7 @@ import (
 )
 
 type ZeebeProcessManagerImpl struct {
-	client zbc.Client
+	client zbc.Client  //TODO: in harekat roo purchase bezan
 }
 
 func NewZeebeProcessManager(client zbc.Client) *ZeebeProcessManagerImpl {
