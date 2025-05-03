@@ -83,18 +83,18 @@ func (r *MongoPurchaseRepository) GetAll() ([]*domain.Purchase, error) {
 	return purchases, err
 }
 
-func (r *MongoPurchaseRepository) UpdateStatus(purchaseID string, status string, paymentID string, userID string) error {
+func (r *MongoPurchaseRepository) UpdateStatus(purchaseID string,currentStatus string, goalStatus string, paymentID string, userID string) error { 
 	objectID, err := bson.ObjectIDFromHex(purchaseID)
 	if err != nil {
 		return err
 	}
 	updateResult, err := r.Collection.UpdateOne(
 		context.TODO(),
-		bson.M{"_id": objectID, "user_id": userID},
-		bson.M{"$set": bson.M{"status": status, "payment_id": paymentID}},
+		bson.M{"_id": objectID, "user_id": userID, "status": currentStatus},
+		bson.M{"$set": bson.M{"status": goalStatus, "payment_id": paymentID}},
 	)
 	if updateResult.MatchedCount == 0 {
-		return fmt.Errorf("no purchase found with this ID for current user")
+		return fmt.Errorf("no pending purchase found with this ID for current user")
 	}
 	return err
 }

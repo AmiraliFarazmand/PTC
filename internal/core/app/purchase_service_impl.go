@@ -40,7 +40,7 @@ func (s *PurchaseServiceImpl) CreatePurchase(userID string, amount int, address 
 
 func (s *PurchaseServiceImpl) ConfirmPayment(purchaseID string, userID string) error {
 	paymentID := generatePaymentID(purchaseID)
-	return s.PurchaseRepo.UpdateStatus(purchaseID, "packaging and delivering", paymentID, userID)
+	return s.PurchaseRepo.UpdateStatus(purchaseID,"pending", "packaging and delivering", paymentID, userID) 
 }
 
 func (s *PurchaseServiceImpl) CancelUnpaidPurchase(purchaseID string) error {
