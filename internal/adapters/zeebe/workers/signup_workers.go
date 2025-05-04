@@ -105,8 +105,8 @@ func createUserHandler(jobClient worker.JobClient, job entities.Job, userService
 	if err != nil {
 		log.Printf("Failed to create command: %v", err)
 	}
-	tempCommand.Send(context.Background()) // TODO: err handling
 
+	_, err = tempCommand.Send(context.Background())		//TODO: err handling in this 
 	if err != nil {
 		log.Printf("Failed to complete job: %v", err)
 	}

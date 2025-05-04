@@ -49,7 +49,7 @@
     <bpmn:sequenceFlow id="Flow_1woitjs" name="yes" sourceRef="token-create-success-gateway" targetRef="send_success_user_login_revent">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isValid</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0z9a6x4" sourceRef="token-create-success-gateway" targetRef="event_send_error_respond">
+    <bpmn:sequenceFlow id="Flow_0z9a6x4" name="No" sourceRef="token-create-success-gateway" targetRef="event_send_error_respond">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isValid = false</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
   </bpmn:process>
@@ -130,6 +130,9 @@
       <bpmndi:BPMNEdge id="Flow_0z9a6x4_di" bpmnElement="Flow_0z9a6x4">
         <di:waypoint x="870" y="215" />
         <di:waypoint x="870" y="118" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="878" y="164" width="15" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
