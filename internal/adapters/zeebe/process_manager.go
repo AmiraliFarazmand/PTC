@@ -31,7 +31,7 @@ func (z *ZeebeProcessManagerImpl) StartSignupProcess(username, password string) 
 	return nil
 }
 
-func (z *ZeebeProcessManagerImpl) StartLoginProcess(username, password string) (*domain.ProcessVariables, error) {
+func (z *ZeebeProcessManagerImpl) StartLoginProcess(username, password string) (*domain.AuthProcessVariables, error) {
 	result, err := StartLoginProcessInstanceWithResult(z.client, username, password)
 	if err != nil {
 		return nil, fmt.Errorf("failed to process login: %w", err)

@@ -25,21 +25,33 @@
       <bpmn:outgoing>failed-authentication-flow</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="success-authentication-flow" name="yes" sourceRef="gateway_is_authorized" targetRef="create-token-task">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=loginValid = true</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isValid = true</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="created-token-flow" sourceRef="create-token-task" targetRef="send_success_user_login_revent" />
+    <bpmn:sequenceFlow id="created-token-flow" sourceRef="create-token-task" targetRef="token-create-success-gateway" />
     <bpmn:sequenceFlow id="failed-authentication-flow" name="No" sourceRef="gateway_is_authorized" targetRef="event_send_error_respond">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=loginValid = false</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isValid = false</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1r64rs3" sourceRef="check-login-request-task" targetRef="gateway_is_authorized" />
     <bpmn:sequenceFlow id="Flow_0e4mtwd" sourceRef="login_request_event" targetRef="check-login-request-task" />
     <bpmn:endEvent id="event_send_error_respond" name="send erorr respond">
       <bpmn:extensionElements />
       <bpmn:incoming>failed-authentication-flow</bpmn:incoming>
+      <bpmn:incoming>Flow_0z9a6x4</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:endEvent id="send_success_user_login_revent" name="send successful respond">
-      <bpmn:incoming>created-token-flow</bpmn:incoming>
+      <bpmn:incoming>Flow_1woitjs</bpmn:incoming>
     </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="token-create-success-gateway" name="created token successfully? ">
+      <bpmn:incoming>created-token-flow</bpmn:incoming>
+      <bpmn:outgoing>Flow_1woitjs</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0z9a6x4</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1woitjs" name="yes" sourceRef="token-create-success-gateway" targetRef="send_success_user_login_revent">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isValid</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0z9a6x4" sourceRef="token-create-success-gateway" targetRef="event_send_error_respond">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isValid = false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="LoginProcess">
@@ -66,13 +78,19 @@
       <bpmndi:BPMNShape id="Event_1t98kak_di" bpmnElement="event_send_error_respond">
         <dc:Bounds x="852" y="82" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="847" y="125" width="51" height="27" />
+          <dc:Bounds x="844" y="44.5" width="51" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1ozz12f_di" bpmnElement="send_success_user_login_revent">
-        <dc:Bounds x="852" y="222" width="36" height="36" />
+        <dc:Bounds x="972" y="222" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="833" y="265" width="79" height="27" />
+          <dc:Bounds x="953" y="265" width="79" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0qldjh1_di" bpmnElement="token-create-success-gateway" isMarkerVisible="true">
+        <dc:Bounds x="845" y="215" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="839" y="272" width="67" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0ghm126_di" bpmnElement="success-authentication-flow">
@@ -84,7 +102,7 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0qlbzyj_di" bpmnElement="created-token-flow">
         <di:waypoint x="760" y="240" />
-        <di:waypoint x="852" y="240" />
+        <di:waypoint x="845" y="240" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1n79oxg_di" bpmnElement="failed-authentication-flow">
         <di:waypoint x="550" y="215" />
@@ -101,6 +119,17 @@
       <bpmndi:BPMNEdge id="Flow_0e4mtwd_di" bpmnElement="Flow_0e4mtwd">
         <di:waypoint x="218" y="240" />
         <di:waypoint x="300" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1woitjs_di" bpmnElement="Flow_1woitjs">
+        <di:waypoint x="895" y="240" />
+        <di:waypoint x="972" y="240" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="925" y="222" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0z9a6x4_di" bpmnElement="Flow_0z9a6x4">
+        <di:waypoint x="870" y="215" />
+        <di:waypoint x="870" y="118" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

@@ -35,7 +35,7 @@ func CreateLoginTokenWorker(client zbc.Client) worker.JobWorker {
 }
 
 func checkLoginHandler(jobClient worker.JobClient, job entities.Job, userService ports.UserService) {
-	var vars domain.ProcessVariables
+	var vars domain.AuthProcessVariables
 	if err := json.Unmarshal([]byte(job.GetVariables()), &vars); err != nil {
 		log.Printf("Failed to parse variables: %v", err)
 		return
@@ -44,11 +44,9 @@ func checkLoginHandler(jobClient worker.JobClient, job entities.Job, userService
 	// Check credentials
 	user, err := userService.Login(vars.Username, vars.Password)
 	if err != nil {
-		vars.LoginValid = false
 		vars.IsValid = false
 		vars.Error = err.Error()
 	} else {
-		vars.LoginValid = true
 		vars.Username = user.Username
 	}
 
@@ -67,7 +65,7 @@ func checkLoginHandler(jobClient worker.JobClient, job entities.Job, userService
 }
 
 func createTokenHandler(jobClient worker.JobClient, job entities.Job) {
-	var vars domain.ProcessVariables
+	var vars domain.AuthProcessVariables
 	if err := json.Unmarshal([]byte(job.GetVariables()), &vars); err != nil {
 		log.Printf("Failed to parse variables: %v", err)
 		return
@@ -83,7 +81,6 @@ func createTokenHandler(jobClient worker.JobClient, job entities.Job) {
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		vars.Error = "Failed to generate token"
-		vars.LoginValid = false
 		vars.IsValid = false
 	} else {
 		vars.Token = tokenString

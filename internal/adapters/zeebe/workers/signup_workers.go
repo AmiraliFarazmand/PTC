@@ -39,7 +39,7 @@ func CreateUserWorker(client zbc.Client, userService ports.UserService) worker.J
 
 func validateCredentialHandler(jobClient worker.JobClient, job entities.Job, userRepo ports.UserRepository) {
 	// Parse incoming variables
-	var vars domain.ProcessVariables
+	var vars domain.AuthProcessVariables
 	if err := json.Unmarshal([]byte(job.GetVariables()), &vars); err != nil {
 		log.Printf("Failed to parse variables: %v", err)
 		return
@@ -78,7 +78,7 @@ func validateCredentialHandler(jobClient worker.JobClient, job entities.Job, use
 }
 
 func createUserHandler(jobClient worker.JobClient, job entities.Job, userService ports.UserService) {
-	var vars domain.ProcessVariables
+	var vars domain.AuthProcessVariables
 	if err := json.Unmarshal([]byte(job.GetVariables()), &vars); err != nil {
 		log.Printf("Failed to parse variables: %v", err)
 		return

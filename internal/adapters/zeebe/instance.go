@@ -10,8 +10,8 @@ import (
 	"github.com/camunda-community-hub/zeebe-client-go/v8/pkg/zbc"
 )
 
-func StartSignUpProcessInstanceWithResult(client zbc.Client, username, password string) (*domain.ProcessVariables, error) {
-	variables := domain.ProcessVariables{
+func StartSignUpProcessInstanceWithResult(client zbc.Client, username, password string) (*domain.AuthProcessVariables, error) {
+	variables := domain.AuthProcessVariables{
 		Username: username,
 		Password: password,
 		IsValid:  true,
@@ -39,7 +39,7 @@ func StartSignUpProcessInstanceWithResult(client zbc.Client, username, password 
 	}
 
 	// Parse result variables
-	var resultVars domain.ProcessVariables
+	var resultVars domain.AuthProcessVariables
 	if err := json.Unmarshal([]byte(result.GetVariables()), &resultVars); err != nil {
 		return nil, fmt.Errorf("failed to parse result variables: %w", err)
 	}
@@ -47,11 +47,11 @@ func StartSignUpProcessInstanceWithResult(client zbc.Client, username, password 
 	return &resultVars, nil
 }
 
-func StartLoginProcessInstanceWithResult(client zbc.Client, username, password string) (*domain.ProcessVariables, error) {
-	variables := domain.ProcessVariables{
-		Username:   username,
-		Password:   password,
-		LoginValid: true,
+func StartLoginProcessInstanceWithResult(client zbc.Client, username, password string) (*domain.AuthProcessVariables, error) {
+	variables := domain.AuthProcessVariables{
+		Username: username,
+		Password: password,
+		IsValid:  true,
 	}
 
 	ctx, cancelFn := context.WithTimeout(context.Background(), 10*time.Second)
@@ -67,14 +67,14 @@ func StartLoginProcessInstanceWithResult(client zbc.Client, username, password s
 
 	result, err := command.
 		WithResult().
-		FetchVariables("username", "loginValid", "token", "error").
+		FetchVariables("username", "isValid", "token", "error").
 		Send(ctx)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to create and complete login instance: %w", err)
 	}
 
-	var resultVars domain.ProcessVariables
+	var resultVars domain.AuthProcessVariables
 	if err := json.Unmarshal([]byte(result.GetVariables()), &resultVars); err != nil {
 		return nil, fmt.Errorf("failed to parse login result variables: %w", err)
 	}
