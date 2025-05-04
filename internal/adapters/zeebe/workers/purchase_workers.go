@@ -127,9 +127,9 @@ func cancelUnpaidHandler(jobClient worker.JobClient, job entities.Job, purchaseS
 	}
 
 	err := purchaseService.CancelUnpaidPurchase(vars.PurchaseID)
-	if err != nil {
-		vars.IsValid = false
+	if err != nil {	//is useless for now; its BPMN can be modified 
 		vars.Error = err.Error()
+		vars.IsValid = false
 	}
 
 	varsJSON, err := json.Marshal(vars)

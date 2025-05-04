@@ -36,11 +36,9 @@
     <bpmn:sequenceFlow id="Flow_0uwhfvw" sourceRef="start-payment-process" targetRef="end_event" />
     <bpmn:endEvent id="end_event" name="end ">
       <bpmn:incoming>Flow_0uwhfvw</bpmn:incoming>
-      <bpmn:terminateEventDefinition id="TerminateEventDefinition_0qiajss" />
     </bpmn:endEvent>
     <bpmn:endEvent id="Event_0x73h1h" name="ended with error">
       <bpmn:incoming>not-valid-flow</bpmn:incoming>
-      <bpmn:terminateEventDefinition id="TerminateEventDefinition_0g3bvy2" />
     </bpmn:endEvent>
   </bpmn:process>
   <bpmn:message id="Message_PaymentReceived" name="PaymentReceived">
@@ -70,13 +68,13 @@
       <bpmndi:BPMNShape id="Event_0ydr38i_di" bpmnElement="start-payment-process">
         <dc:Bounds x="532" y="122" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1m8z348_di" bpmnElement="end_event">
+      <bpmndi:BPMNShape id="Event_0wm60ib_di" bpmnElement="end_event">
         <dc:Bounds x="622" y="152" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="631" y="195" width="19" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1ba20rs_di" bpmnElement="Event_0x73h1h">
+      <bpmndi:BPMNShape id="Event_1lh0xdg_di" bpmnElement="Event_0x73h1h">
         <dc:Bounds x="682" y="382" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="661" y="425" width="80" height="14" />
