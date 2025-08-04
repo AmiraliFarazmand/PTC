@@ -15,7 +15,6 @@ import (
 // type FilaanClient struct {
 // 	zbc.Client
 // 	purchaseService ports.PurchaseService
-// } TODO: convert into this approach
 
 func CreatePurchaseWorker(client zbc.Client, purchaseService ports.PurchaseService) worker.JobWorker {
 	return client.NewJobWorker().

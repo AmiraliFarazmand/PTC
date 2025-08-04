@@ -8,7 +8,7 @@ import (
 )
 
 type ZeebeProcessManagerImpl struct {
-	client zbc.Client //TODO: in harekat roo purchase bezan
+	client zbc.Client
 }
 
 func NewZeebeProcessManager(client zbc.Client) *ZeebeProcessManagerImpl {
@@ -44,7 +44,6 @@ func (z *ZeebeProcessManagerImpl) StartLoginProcess(username, password string) (
 	return result, nil
 }
 
-// TODO: instance saakhtane in mesle baghie beshe.
 func (z *ZeebeProcessManagerImpl) StartPurchaseProcess(userID string, amount int, address string) (*domain.PurchaseProcessVariables, error) {
 	result, err := StartPurchaseProcessWithResult(z.client, userID, address, amount)
 	if err != nil {

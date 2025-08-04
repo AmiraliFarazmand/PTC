@@ -2,7 +2,6 @@ package auth
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/AmiraliFarazmand/PTC_Task/internal/ports"
@@ -57,13 +56,11 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	// Start login process and wait for result
 	result, err := h.ProcessManager.StartLoginProcess(body.Username, body.Password)
 	if err != nil {
-		log.Println("case1")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
-	} 
+	}
 
 	if !result.IsValid {
-		log.Println("case2")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": result.Error})
 		return
 	}
@@ -77,7 +74,6 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		"username": result.Username,
 	})
 }
-
 
 func (h *AuthHandler) ValidateHnadler(c *gin.Context) {
 	user, exists := c.Get("user")
